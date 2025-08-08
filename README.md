@@ -51,6 +51,19 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 The project uses ShadCN UI components for consistent and accessible UI elements. All forms include proper validation and responsive design.
 
+### Prerequisites
+
+Before running the frontend, ensure your Go backend is properly configured:
+
+1. **Backend Setup**: Your Go backend should be running on `http://localhost:8080`
+2. **Environment Variables**: Make sure your backend has these environment variables set:
+
+   ```env
+   GOOGLE_CLIENT_ID=your-google-oauth-client-id
+   GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
+   SESSION_SECRET=your-very-long-random-session-secret-key-32-chars-minimum
+   ```
+
 ## License
 
 MIT
