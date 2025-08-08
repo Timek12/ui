@@ -1,10 +1,37 @@
+"use client";
+
 import { LogoIcon } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export default function LoginPage() {
+export default function SignUpPage() {
+  const { login, isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/"); // Redirect to home page if already authenticated
+    }
+  }, [isAuthenticated, router]);
+
+  const handleGoogleSignUp = () => {
+    login(); // This will redirect to OAuth (same flow as login)
+  };
+
+  if (isLoading) {
+    return (
+      <section className="flex min-h-screen bg-zinc-50 px-4 py-4 md:py-12 dark:bg-transparent">
+        <div className="m-auto">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+        </div>
+      </section>
+    );
+  }
   return (
     <section className="flex min-h-screen bg-zinc-50 px-4 py-4 md:py-12 dark:bg-transparent">
       {" "}
@@ -81,7 +108,11 @@ export default function LoginPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Button type="button" variant="outline">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGoogleSignUp}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="0.98em"

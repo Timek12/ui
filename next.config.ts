@@ -1,7 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  async rewrites() {
+    return [
+      {
+        source: '/auth/google/callback',
+        destination: '/auth/callback',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

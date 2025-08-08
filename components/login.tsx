@@ -1,10 +1,36 @@
-import { LogoIcon } from "@/components/logo";
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const { login, isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/"); // Redirect to home page if already authenticated
+    }
+  }, [isAuthenticated, router]);
+
+  const handleGoogleLogin = () => {
+    login(); // This will redirect to OAuth
+  };
+
+  if (isLoading) {
+    return (
+      <section className="flex min-h-screen bg-zinc-50 px-4 py-4 md:py-12 dark:bg-transparent">
+        <div className="m-auto">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+        </div>
+      </section>
+    );
+  }
   return (
     <section className="flex min-h-screen bg-zinc-50 px-4 py-4 md:py-12 dark:bg-transparent">
       <form
@@ -13,9 +39,9 @@ export default function LoginPage() {
       >
         <div className="bg-card -m-px rounded-[calc(var(--radius)+.125rem)] border p-8 pb-6">
           <div className="text-center">
-            <Link href="/" aria-label="go home" className="mx-auto block w-fit">
+            {/* <Link href="/" aria-label="go home" className="mx-auto block w-fit">
               <LogoIcon />
-            </Link>
+            </Link> */}
             <h1 className="mb-1 mt-4 text-xl font-semibold">
               Sign In to LunaGuard
             </h1>
@@ -65,7 +91,7 @@ export default function LoginPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" onClick={handleGoogleLogin}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="0.98em"
