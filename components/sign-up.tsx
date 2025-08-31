@@ -1,175 +1,256 @@
 "use client";
 
-import { LogoIcon } from "@/components/logo";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import { useAuth } from "@/contexts/AuthContext";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Alert, AlertDescription } from "./ui/alert";
 
-export default function SignUpPage() {
-  const { login, isAuthenticated, isLoading } = useAuth();
+export default function SignUp() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const { register, oauthLogin } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/"); // Redirect to home page if already authenticated
-    }
-  }, [isAuthenticated, router]);
-
-  const handleGoogleSignUp = () => {
-    login(); // This will redirect to OAuth (same flow as login)
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    if (error) setError("");
   };
 
-  if (isLoading) {
-    return (
-      <section className="flex min-h-screen bg-zinc-50 px-4 py-4 md:py-12 dark:bg-transparent">
-        <div className="m-auto">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-        </div>
-      </section>
-    );
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    // Basic validation
+    if (!formData.name.trim()) {
+      setError("Name is required");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!formData.email.trim()) {
+      setError("Email is required");
+      setIsLoading(false);
+      return;
+    }
+
+    if (formData.password.length < 14) {
+      setError("Password must be at least 14 characters long");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const result = await register(formData);
+
+      if (result.success) {
+        router.push("/");
+      } else {
+        // Handle specific error cases with more user-friendly messages
+        if (result.error === "email_exists") {
+          setError(
+            "An account with this email already exists. Please try logging in or use a different email."
+          );
+        } else if (result.error === "validation_failed") {
+          setError("Please check your information and try again.");
+        } else {
+          setError(result.message || "Registration failed. Please try again.");
+        }
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOAuthSignup = () => {
+    oauthLogin("google");
+  };
+
+  const isFormValid =
+    formData.name.trim() &&
+    formData.email.trim() &&
+    formData.password.length >= 8;
+
   return (
-    <section className="flex min-h-screen bg-zinc-50 px-4 py-4 md:py-12 dark:bg-transparent">
-      {" "}
-      <form
-        action=""
-        className="bg-muted m-auto h-fit w-full max-w-sm overflow-hidden rounded-[calc(var(--radius)+.125rem)] border shadow-md shadow-zinc-950/5 dark:[--color-muted:var(--color-zinc-900)]"
-      >
-        <div className="bg-card -m-px rounded-[calc(var(--radius)+.125rem)] border p-8 pb-6">
-          <div className="text-center">
-            <Link href="/" aria-label="go home" className="mx-auto block w-fit">
-              <LogoIcon />
-            </Link>
-            <h1 className="text-title mb-1 mt-4 text-xl font-semibold">
-              Create a LunaGuard Account
-            </h1>
-            <p className="text-sm">Welcome! Create an account to get started</p>
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">
+            Create Account
+          </CardTitle>
+          <CardDescription className="text-center">
+            Enter your details to create your LunaGuard account
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-          <div className="mt-6 space-y-6">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="firstname" className="block text-sm">
-                  Firstname
-                </Label>
-                <Input type="text" required name="firstname" id="firstname" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastname" className="block text-sm">
-                  Lastname
-                </Label>
-                <Input type="text" required name="lastname" id="lastname" />
-              </div>
-            </div>
-
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="block text-sm">
-                Username
-              </Label>
-              <Input type="email" required name="email" id="email" />
-            </div>
-
-            <div className="space-y-0.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="pwd" className="text-title text-sm">
-                  Password
-                </Label>
-                <Button asChild variant="link" size="sm">
-                  <Link
-                    href="#"
-                    className="link intent-info variant-ghost text-sm"
-                  >
-                    Forgot your Password ?
-                  </Link>
-                </Button>
-              </div>
+              <Label htmlFor="name">Full Name</Label>
               <Input
-                type="password"
+                id="name"
+                name="name"
+                type="text"
+                autoComplete="name"
                 required
-                name="pwd"
-                id="pwd"
-                className="input sz-md variant-mixed"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="Enter your full name"
+                disabled={isLoading}
               />
             </div>
 
-            <Button className="w-full">Sign In</Button>
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={formData.email}
+                onChange={handleInputChange}
+                placeholder="Enter your email"
+                disabled={isLoading}
+              />
+            </div>
 
-          <div className="my-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-            <hr className="border-dashed" />
-            <span className="text-muted-foreground text-xs">
-              Or continue With
-            </span>
-            <hr className="border-dashed" />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  required
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  placeholder="Enter your password"
+                  disabled={isLoading}
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={isLoading}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                  <span className="sr-only">
+                    {showPassword ? "Hide password" : "Show password"}
+                  </span>
+                </Button>
+              </div>
+              <p className="text-sm text-gray-500">
+                Password must be at least 14 characters long
+              </p>
+            </div>
 
-          <div className="grid grid-cols-2 gap-3">
             <Button
-              type="button"
-              variant="outline"
-              onClick={handleGoogleSignUp}
+              type="submit"
+              className="w-full"
+              disabled={isLoading || !isFormValid}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="0.98em"
-                height="1em"
-                viewBox="0 0 256 262"
-              >
-                <path
-                  fill="#4285f4"
-                  d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622l38.755 30.023l2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"
-                ></path>
-                <path
-                  fill="#34a853"
-                  d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055c-34.523 0-63.824-22.773-74.269-54.25l-1.531.13l-40.298 31.187l-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"
-                ></path>
-                <path
-                  fill="#fbbc05"
-                  d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82c0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602z"
-                ></path>
-                <path
-                  fill="#eb4335"
-                  d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0C79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"
-                ></path>
-              </svg>
-              <span>Google</span>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating Account...
+                </>
+              ) : (
+                "Create Account"
+              )}
             </Button>
-            <Button type="button" variant="outline">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="1em"
-                height="1em"
-                viewBox="0 0 256 256"
-              >
-                <path fill="#f1511b" d="M121.666 121.666H0V0h121.666z"></path>
-                <path fill="#80cc28" d="M256 121.666H134.335V0H256z"></path>
-                <path
-                  fill="#00adef"
-                  d="M121.663 256.002H0V134.336h121.663z"
-                ></path>
-                <path
-                  fill="#fbbc09"
-                  d="M256 256.002H134.335V134.336H256z"
-                ></path>
-              </svg>
-              <span>Microsoft</span>
-            </Button>
-          </div>
-        </div>
+          </form>
 
-        <div className="p-3">
-          <p className="text-accent-foreground text-center text-sm">
-            Have an account ?
-            <Button asChild variant="link" className="px-2">
-              <Link href="/login">Sign In</Link>
-            </Button>
-          </p>
-        </div>
-      </form>
-    </section>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-gray-500">
+                Or continue with
+              </span>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={handleOAuthSignup}
+            disabled={isLoading}
+          >
+            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+              <path
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                fill="#4285F4"
+              />
+              <path
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                fill="#34A853"
+              />
+              <path
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                fill="#FBBC05"
+              />
+              <path
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                fill="#EA4335"
+              />
+            </svg>
+            Sign up with Google
+          </Button>
+
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
+                Sign in
+              </Link>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

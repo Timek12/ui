@@ -158,11 +158,17 @@ export default function Home() {
             </div>
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-3 px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <img
-                  src={user?.avatarURL}
-                  alt={user?.name}
-                  className="h-8 w-8 rounded-full"
-                />
+                {user?.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt={user.name}
+                    className="h-8 w-8 rounded-full"
+                  />
+                ) : (
+                  <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-medium">
+                    {user?.name?.charAt(0)?.toUpperCase() || "U"}
+                  </div>
+                )}
                 <div className="text-sm">
                   <p className="font-medium text-gray-900 dark:text-white">
                     {user?.name}

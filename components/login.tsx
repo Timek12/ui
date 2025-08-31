@@ -5,12 +5,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { login, oauthLogin, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+
+  // Form state
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -18,8 +24,38 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, router]);
 
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      const result = await login({ email, password });
+
+      if (!result.success) {
+        // Handle specific error cases with more user-friendly messages
+        if (result.error === "invalid_credentials") {
+          setError(
+            "Invalid email or password. Please check your credentials and try again."
+          );
+        } else if (result.error === "validation_failed") {
+          setError("Please enter a valid email and password.");
+        } else {
+          setError(
+            result.message || result.error || "Login failed. Please try again."
+          );
+        }
+      }
+      // If successful, the user state will be updated and useEffect will redirect
+    } catch (error) {
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleGoogleLogin = () => {
-    login(); // This will redirect to OAuth
+    oauthLogin("google");
   };
 
   if (isLoading) {
@@ -34,26 +70,37 @@ export default function LoginPage() {
   return (
     <section className="flex min-h-screen bg-zinc-50 px-4 py-4 md:py-12 dark:bg-transparent">
       <form
-        action=""
+        onSubmit={handleEmailLogin}
         className="bg-muted m-auto h-fit w-full max-w-sm overflow-hidden rounded-[calc(var(--radius)+.125rem)] border shadow-md shadow-zinc-950/5 dark:[--color-muted:var(--color-zinc-900)]"
       >
         <div className="bg-card -m-px rounded-[calc(var(--radius)+.125rem)] border p-8 pb-6">
           <div className="text-center">
-            {/* <Link href="/" aria-label="go home" className="mx-auto block w-fit">
-              <LogoIcon />
-            </Link> */}
             <h1 className="mb-1 mt-4 text-xl font-semibold">
               Sign In to LunaGuard
             </h1>
             <p className="text-sm">Welcome back! Sign in to continue</p>
           </div>
 
+          {error && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
           <div className="mt-6 space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email" className="block text-sm">
-                Username
+                Email
               </Label>
-              <Input type="email" required name="email" id="email" />
+              <Input
+                type="email"
+                required
+                name="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isSubmitting}
+              />
             </div>
 
             <div className="space-y-0.5">
@@ -75,23 +122,34 @@ export default function LoginPage() {
                 required
                 name="pwd"
                 id="pwd"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isSubmitting}
                 className="input sz-md variant-mixed"
               />
             </div>
 
-            <Button className="w-full">Sign In</Button>
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Signing In..." : "Sign In"}
+            </Button>
           </div>
 
           <div className="my-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
             <hr className="border-dashed" />
             <span className="text-muted-foreground text-xs">
-              Or continue With
+              Or continue with
             </span>
             <hr className="border-dashed" />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Button type="button" variant="outline" onClick={handleGoogleLogin}>
+          <div className="grid grid-cols-1 gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGoogleLogin}
+              disabled={isSubmitting}
+              className="w-full"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="0.98em"
@@ -115,27 +173,7 @@ export default function LoginPage() {
                   d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0C79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"
                 ></path>
               </svg>
-              <span>Google</span>
-            </Button>
-            <Button type="button" variant="outline">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="1em"
-                height="1em"
-                viewBox="0 0 256 256"
-              >
-                <path fill="#f1511b" d="M121.666 121.666H0V0h121.666z"></path>
-                <path fill="#80cc28" d="M256 121.666H134.335V0H256z"></path>
-                <path
-                  fill="#00adef"
-                  d="M121.663 256.002H0V134.336h121.663z"
-                ></path>
-                <path
-                  fill="#fbbc09"
-                  d="M256 256.002H134.335V134.336H256z"
-                ></path>
-              </svg>
-              <span>Microsoft</span>
+              <span>Continue with Google</span>
             </Button>
           </div>
         </div>
