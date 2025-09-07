@@ -1,4 +1,4 @@
-# LunaGuard UI
+# LunaGuard LP (Landing page)
 
 A modern authentication system built with Next.js, React 19, and ShadCN UI components.
 
