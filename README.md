@@ -1,4 +1,6 @@
-# LunaGuard React Frontend
+# LunaGuard LP (Landing page)
+
+> > > > > > > main
 
 A React.js version of the LunaGuard frontend built with Vite, ShadCN UI components, and modern React patterns.
 
