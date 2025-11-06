@@ -59,9 +59,11 @@ const DashboardHome: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-2">
-          Welcome to LunaGuard Secret Management
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          Dashboard
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300 mt-2">
+          Welcome to Luna Secret Management
         </p>
       </div>
 
@@ -75,10 +77,10 @@ const DashboardHome: React.FC = () => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   {stat.title}
                 </p>
-                <p className="text-2xl font-bold text-gray-900 mt-2">
+                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
                   {stat.value}
                 </p>
               </div>
@@ -94,37 +96,39 @@ const DashboardHome: React.FC = () => {
       {isAdmin && vaultStatus && (
         <div className="card">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
               Vault Information
             </h2>
             <Link
               to="/dashboard/vault"
-              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+              className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
             >
               Manage Vault →
             </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">Status</p>
-              <p className="text-lg font-semibold text-gray-900 mt-1">
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Status</p>
+              <p className="text-lg font-semibold text-gray-900 dark:text-white mt-1">
                 {vaultStatus?.vault.initialized
                   ? "Initialized"
                   : "Not Initialized"}
               </p>
             </div>
 
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">State</p>
-              <p className="text-lg font-semibold text-gray-900 mt-1">
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400">State</p>
+              <p className="text-lg font-semibold text-gray-900 dark:text-white mt-1">
                 {vaultStatus?.vault.sealed ? "Sealed" : "Unsealed"}
               </p>
             </div>
 
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">Version</p>
-              <p className="text-lg font-semibold text-gray-900 mt-1">
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Version
+              </p>
+              <p className="text-lg font-semibold text-gray-900 dark:text-white mt-1">
                 {vaultStatus?.vault.version || "N/A"}
               </p>
             </div>

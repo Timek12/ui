@@ -11,6 +11,7 @@ import RegisterPage from "./components/auth/RegisterPage";
 import DebugLogs from "./components/common/DebugLogs";
 import DashboardHome from "./components/dashboard/DashboardHome";
 import DashboardLayout from "./components/layout/DashboardLayout";
+import { CreateSecretPage } from "./components/secrets/CreateSecretPage";
 import SecretsPage from "./components/secrets/SecretsPage";
 import VaultPage from "./components/vault/VaultPage";
 import "./index.css";
@@ -35,6 +36,7 @@ function App() {
           >
             <Route index element={<DashboardHome />} />
             <Route path="secrets" element={<SecretsPage />} />
+            <Route path="create-secret" element={<CreateSecretPage />} />
             <Route
               path="all-secrets"
               element={

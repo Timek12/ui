@@ -56,12 +56,12 @@ const AdminSecretsPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Secrets Management
           </h1>
-          <p className="text-gray-600 mt-2">View and manage all user secrets</p>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">View and manage all user secrets</p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
           <Shield className="w-4 h-4" />
           <span>Admin Only</span>
         </div>
@@ -77,56 +77,56 @@ const AdminSecretsPage: React.FC = () => {
 
       <div className="card">
         <div className="mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             All Secrets ({secrets?.length || 0})
           </h2>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Description
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   User ID
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Version
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Created
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Updated
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {secrets?.map((secret) => (
-                <tr key={secret.id} className="hover:bg-gray-50">
+                <tr key={secret.id} className="hover:bg-gray-50 dark:bg-gray-700">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <Key className="w-4 h-4 text-gray-400 mr-2" />
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">
                         {secret.name}
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900 max-w-xs truncate">
+                    <div className="text-sm text-gray-900 dark:text-white max-w-xs truncate">
                       {secret.description || "No description"}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
+                    <div className="text-sm text-gray-900 dark:text-white">
                       {secret.user_id}
                     </div>
                   </td>
@@ -135,10 +135,10 @@ const AdminSecretsPage: React.FC = () => {
                       v{secret.version}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     {new Date(secret.created_at).toLocaleDateString("en-GB")}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     {new Date(secret.updated_at).toLocaleDateString("en-GB")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -162,7 +162,7 @@ const AdminSecretsPage: React.FC = () => {
         {secrets && secrets.length === 0 && (
           <div className="text-center py-12">
             <Key className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No secrets found</p>
+            <p className="text-gray-500 dark:text-gray-400">No secrets found</p>
           </div>
         )}
       </div>
@@ -177,7 +177,7 @@ const AdminSecretsPage: React.FC = () => {
         title="Delete Secret"
       >
         <div className="space-y-4">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             Are you sure you want to delete this secret? This action cannot be
             undone and will permanently remove the secret from the system.
           </p>

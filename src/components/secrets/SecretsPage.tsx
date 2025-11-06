@@ -9,6 +9,7 @@ import {
   Trash2,
 } from "lucide-react";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   useCreateSecretMutation,
   useDeleteSecretMutation,
@@ -50,6 +51,7 @@ const SecretsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const navigate = useNavigate();
   const handleCreateSecret = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -142,7 +144,7 @@ const SecretsPage: React.FC = () => {
           <p className="text-gray-600 mt-2">Manage your encrypted secrets</p>
         </div>
         <button
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={() => navigate("/dashboard/create-secret")}
           className="btn-primary flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
@@ -303,7 +305,7 @@ const SecretsPage: React.FC = () => {
             Get started by creating your first secret
           </p>
           <button
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={() => navigate("/dashboard/create-secret")}
             className="btn-primary inline-flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />

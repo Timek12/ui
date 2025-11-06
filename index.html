@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Luna - Secret Management</title>
+    <script>
+      // Initialize dark mode before page renders to prevent flash
+      if (localStorage.getItem("darkMode") === "true") {
+        document.documentElement.classList.add("dark");
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

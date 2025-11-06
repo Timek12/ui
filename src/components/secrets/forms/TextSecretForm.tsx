@@ -1,0 +1,189 @@
+import { Plus, X } from "lucide-react";
+import React, { useState } from "react";
+
+interface TextSecretFormProps {
+  onSubmit: (data: any) => void;
+  onCancel: () => void;
+}
+
+export const TextSecretForm: React.FC<TextSecretFormProps> = ({
+  onSubmit,
+  onCancel,
+}) => {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [fields, setFields] = useState<Array<{ key: string; value: string }>>([
+    { key: "", value: "" },
+  ]);
+  const [ttl, setTtl] = useState<string>("");
+  const [ttlUnit, setTtlUnit] = useState<"minutes" | "hours" | "days">("hours");
+
+  const addField = () => {
+    setFields([...fields, { key: "", value: "" }]);
+  };
+
+  const removeField = (index: number) => {
+    if (fields.length > 1) {
+      setFields(fields.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateField = (
+    index: number,
+    field: "key" | "value",
+    value: string
+  ) => {
+    const newFields = [...fields];
+    newFields[index][field] = value;
+    setFields(newFields);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const ttlSeconds = ttl
+      ? parseInt(ttl) *
+        (ttlUnit === "minutes" ? 60 : ttlUnit === "hours" ? 3600 : 86400)
+      : undefined;
+
+    onSubmit({
+      type: "text_with_ttl",
+      name,
+      description,
+      fields: fields.filter((f) => f.key && f.value),
+      ttl: ttlSeconds,
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Name */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Secret Name *
+        </label>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          placeholder="my-secret"
+        />
+      </div>
+
+      {/* Description */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Description
+        </label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={2}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          placeholder="Optional description"
+        />
+      </div>
+
+      {/* Key-Value Fields */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Key-Value Pairs *
+          </label>
+          <button
+            type="button"
+            onClick={addField}
+            className="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700"
+          >
+            <Plus className="w-4 h-4" />
+            Add Field
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          {fields.map((field, index) => (
+            <div key={index} className="flex gap-2">
+              <input
+                type="text"
+                value={field.key}
+                onChange={(e) => updateField(index, "key", e.target.value)}
+                placeholder="Key"
+                required
+                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+              <input
+                type="text"
+                value={field.value}
+                onChange={(e) => updateField(index, "value", e.target.value)}
+                placeholder="Value"
+                required
+                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+              {fields.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeField(index)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* TTL (Optional) */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Time To Live (Optional)
+        </label>
+        <div className="flex gap-2">
+          <input
+            type="number"
+            value={ttl}
+            onChange={(e) => setTtl(e.target.value)}
+            min="1"
+            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            placeholder="Enter duration"
+          />
+          <select
+            value={ttlUnit}
+            onChange={(e) =>
+              setTtlUnit(e.target.value as "minutes" | "hours" | "days")
+            }
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          >
+            <option value="minutes">Minutes</option>
+            <option value="hours">Hours</option>
+            <option value="days">Days</option>
+          </select>
+        </div>
+        {ttl && (
+          <p className="mt-1 text-sm text-gray-500">
+            Secret will expire in {ttl} {ttlUnit}
+          </p>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-3 pt-4">
+        <button
+          type="submit"
+          className="flex-1 bg-primary-600 dark:bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors"
+        >
+          Create Secret
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  );
+};

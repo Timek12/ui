@@ -96,8 +96,10 @@ const VaultPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Vault Management</h1>
-        <p className="text-gray-600 mt-2">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          Vault Management
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300 mt-2">
           Initialize, unseal, and manage your cryptographic vault
         </p>
       </div>
@@ -117,12 +119,16 @@ const VaultPage: React.FC = () => {
       <div className="card">
         <div className="flex items-center gap-3 mb-6">
           <Shield className="w-8 h-8 text-primary-600" />
-          <h2 className="text-2xl font-semibold text-gray-900">Vault Status</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+            Vault Status
+          </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600 mb-1">Initialization</p>
+          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">
+              Initialization
+            </p>
             <p
               className={`text-lg font-semibold ${
                 vault?.initialized ? "text-green-600" : "text-red-600"
@@ -132,8 +138,10 @@ const VaultPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600 mb-1">State</p>
+          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">
+              State
+            </p>
             <p
               className={`text-lg font-semibold ${
                 vault?.sealed ? "text-red-600" : "text-green-600"
@@ -143,9 +151,11 @@ const VaultPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600 mb-1">Version</p>
-            <p className="text-lg font-semibold text-gray-900">
+          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">
+              Version
+            </p>
+            <p className="text-lg font-semibold text-gray-900 dark:text-white">
               {vault?.version || "N/A"}
             </p>
           </div>
@@ -239,9 +249,11 @@ const VaultPage: React.FC = () => {
         title="Initialize Vault"
         size="md"
       >
-        <div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <h4 className="font-semibold text-yellow-800 mb-2">⚠️ Important</h4>
-          <ul className="text-sm text-yellow-700 space-y-1">
+        <div className="mb-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+          <h4 className="font-semibold text-yellow-800 dark:text-yellow-300 mb-2">
+            ⚠️ Important
+          </h4>
+          <ul className="text-sm text-yellow-700 dark:text-yellow-400 space-y-1">
             <li>• This is a one-time operation</li>
             <li>• Store your external token safely - you cannot recover it</li>
             <li>• The external token is required to unseal the vault</li>
@@ -265,7 +277,9 @@ const VaultPage: React.FC = () => {
               placeholder="Enter a strong external token"
               disabled={isProcessing}
             />
-            <p className="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Minimum 8 characters
+            </p>
           </div>
 
           <div className="flex items-center gap-3 pt-4">
@@ -310,7 +324,7 @@ const VaultPage: React.FC = () => {
               placeholder="Enter your external token"
               disabled={isProcessing}
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               Use the same token you used during initialization
             </p>
           </div>

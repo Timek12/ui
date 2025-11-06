@@ -52,13 +52,13 @@ const RegisterPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-600 to-primary-800">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-2xl">
+      <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow dark:border dark:border-gray-700-2xl">
         <div className="flex flex-col items-center mb-8">
           <div className="bg-primary-100 p-3 rounded-full mb-4">
             <Shield className="w-12 h-12 text-primary-600" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Create Account</h1>
-          <p className="text-gray-600 mt-2">Join LunaGuard today</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create Account</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">Join Luna today</p>
         </div>
 
         {error && (
@@ -133,7 +133,7 @@ const RegisterPage: React.FC = () => {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             Already have an account?{" "}
             <Link
               to="/login"

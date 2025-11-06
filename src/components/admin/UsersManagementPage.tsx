@@ -87,12 +87,12 @@ const UsersManagementPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">User Management</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">
             Manage user roles and permissions
           </p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
           <Shield className="w-4 h-4" />
           <span>Admin Only</span>
         </div>
@@ -109,59 +109,59 @@ const UsersManagementPage: React.FC = () => {
       <div className="card">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   User
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Email
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Provider
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Role
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Joined
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {users?.map((user) => (
-                <tr key={user.user_id} className="hover:bg-gray-50">
+                <tr key={user.user_id} className="hover:bg-gray-50 dark:bg-gray-700">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10 bg-primary-100 rounded-full flex items-center justify-center">
                         <UserIcon className="h-5 w-5 text-primary-600" />
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">
                           {user.name || "No name"}
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
                           ID: {user.user_id}
                         </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{user.email}</div>
+                    <div className="text-sm text-gray-900 dark:text-white">{user.email}</div>
                     {user.email_verified ? (
                       <span className="text-xs text-green-600">✓ Verified</span>
                     ) : (
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
                         Not verified
                       </span>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{user.provider}</div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-sm text-gray-900 dark:text-white">{user.provider}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
                       {user.auth_method}
                     </div>
                   </td>
@@ -184,7 +184,7 @@ const UsersManagementPage: React.FC = () => {
                       <option value="admin">Admin</option>
                     </select>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     {new Date(user.created_at).toLocaleDateString("en-GB")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -213,7 +213,7 @@ const UsersManagementPage: React.FC = () => {
         {users && users.length === 0 && (
           <div className="text-center py-12">
             <UserIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No users found</p>
+            <p className="text-gray-500 dark:text-gray-400">No users found</p>
           </div>
         )}
       </div>
@@ -228,7 +228,7 @@ const UsersManagementPage: React.FC = () => {
         title="Delete User"
       >
         <div className="space-y-4">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             Are you sure you want to delete this user? This action cannot be
             undone. All user data and secrets will be permanently removed.
           </p>
