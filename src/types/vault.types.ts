@@ -24,7 +24,6 @@ export interface UnsealRequest {
   external_token: string;
 }
 
-// Crypto Types
 export interface EncryptRequest {
   plaintext: string;
   context?: Record<string, string>;

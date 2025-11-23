@@ -2,7 +2,7 @@ import { Activity, Key, Lock } from "lucide-react";
 import React from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { useGetSecretsQuery } from "../../services/secretsApi";
+import { useGetDataQuery } from "../../services/dataApi";
 import { useGetVaultStatusQuery } from "../../services/vaultApi";
 import { RootState } from "../../store";
 import LoadingSpinner from "../common/LoadingSpinner";
@@ -13,7 +13,7 @@ const DashboardHome: React.FC = () => {
 
   const { data: vaultStatus, isLoading: vaultLoading } =
     useGetVaultStatusQuery();
-  const { data: secrets, isLoading: secretsLoading } = useGetSecretsQuery(
+  const { data: dataItems, isLoading: dataLoading } = useGetDataQuery(
     undefined,
     {
       refetchOnMountOrArgChange: true,
@@ -22,11 +22,11 @@ const DashboardHome: React.FC = () => {
 
   const stats = [
     {
-      title: "Total Secrets",
-      value: secrets?.length || 0,
+      title: "Total Data",
+      value: dataItems?.length || 0,
       icon: Key,
       color: "bg-blue-500",
-      link: "/dashboard/secrets",
+      link: "/dashboard/data",
     },
     ...(isAdmin
       ? [
@@ -40,15 +40,15 @@ const DashboardHome: React.FC = () => {
         ]
       : []),
     {
-      title: "Active Secrets",
-      value: secrets?.filter((s) => s.is_active).length || 0,
+      title: "Active Data",
+      value: dataItems?.filter((s) => s.is_active).length || 0,
       icon: Activity,
       color: "bg-purple-500",
-      link: "/dashboard/secrets",
+      link: "/dashboard/data",
     },
   ];
 
-  if (vaultLoading || secretsLoading) {
+  if (vaultLoading || dataLoading) {
     return (
       <div className="flex justify-center items-center h-96">
         <LoadingSpinner size="lg" message="Loading dashboard..." />
@@ -63,7 +63,7 @@ const DashboardHome: React.FC = () => {
           Dashboard
         </h1>
         <p className="text-gray-600 dark:text-gray-300 mt-2">
-          Welcome to Luna Secret Management
+          Welcome to Luna Data Management
         </p>
       </div>
 
@@ -136,38 +136,41 @@ const DashboardHome: React.FC = () => {
         </div>
       )}
 
-      {/* Recent Secrets */}
+      {/* Recent Data */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Recent Secrets
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Recent Data
           </h2>
           <Link
-            to="/dashboard/secrets"
+            to="/dashboard/data"
             className="text-sm text-primary-600 hover:text-primary-700 font-medium"
           >
             View All →
           </Link>
         </div>
 
-        {secrets && secrets.length > 0 ? (
+        {dataItems && dataItems.length > 0 ? (
           <div className="space-y-3">
-            {secrets.slice(0, 5).map((secret) => (
+            {dataItems.slice(0, 5).map((item) => (
               <div
-                key={secret.id}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                key={item.id}
+                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
               >
                 <div className="flex items-center gap-3">
-                  <Key className="w-5 h-5 text-gray-400" />
+                  <Key className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                   <div>
-                    <p className="font-medium text-gray-900">{secret.name}</p>
-                    <p className="text-sm text-gray-500">
-                      {secret.description || "No description"}
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {item.name}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {item.description || "No description"}
                     </p>
                   </div>
                 </div>
-                <span className="text-xs text-gray-500">
-                  Updated {new Date(secret.updated_at).toLocaleDateString()}
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Updated{" "}
+                  {new Date(item.updated_at).toLocaleDateString("en-GB")}
                 </span>
               </div>
             ))}
@@ -175,12 +178,12 @@ const DashboardHome: React.FC = () => {
         ) : (
           <div className="text-center py-8">
             <Key className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No secrets yet</p>
+            <p className="text-gray-500">No data yet</p>
             <Link
-              to="/dashboard/secrets"
+              to="/dashboard/create-data"
               className="text-primary-600 hover:text-primary-700 text-sm font-medium mt-2 inline-block"
             >
-              Create your first secret
+              Create your first data
             </Link>
           </div>
         )}

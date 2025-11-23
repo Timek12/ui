@@ -69,6 +69,6 @@ const baseQueryWithReauth: BaseQueryFn<
 // Base API configuration with auto-refresh
 export const api = createApi({
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["User", "Secrets", "Sessions", "Vault", "Users", "AdminSecrets"],
+  tagTypes: ["User", "Data", "Sessions", "Vault", "Users", "AdminData"],
   endpoints: () => ({}),
 });

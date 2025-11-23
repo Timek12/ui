@@ -17,8 +17,8 @@ export interface UpdateUserRoleRequest {
   role: "user" | "admin";
 }
 
-// Admin Secret Management Types
-export interface AdminSecretItem {
+// Admin Data Management Types
+export interface AdminDataItem {
   id: string;
   user_id: number;
   name: string;
@@ -70,31 +70,31 @@ const adminApi = api.injectEndpoints({
       invalidatesTags: ["Users"],
     }),
 
-    // Secret Management
-    getAllSecrets: builder.query<AdminSecretItem[], void>({
+    // Data Management
+    getAllData: builder.query<AdminDataItem[], void>({
       query: () => ({
-        url: "/api/admin/secrets",
+        url: "/api/admin/data",
         method: "GET",
       }),
-      providesTags: ["AdminSecrets"],
+      providesTags: ["AdminData"],
     }),
 
-    getUserSecrets: builder.query<AdminSecretItem[], number>({
+    getUserData: builder.query<AdminDataItem[], number>({
       query: (userId) => ({
-        url: `/api/admin/secrets/user/${userId}`,
+        url: `/api/admin/data/user/${userId}`,
         method: "GET",
       }),
       providesTags: (_result, _error, userId) => [
-        { type: "AdminSecrets", id: userId },
+        { type: "AdminData", id: userId },
       ],
     }),
 
-    deleteAnySecret: builder.mutation<void, string>({
-      query: (secretId) => ({
-        url: `/api/admin/secrets/${secretId}`,
+    deleteAnyData: builder.mutation<void, string>({
+      query: (dataId) => ({
+        url: `/api/admin/data/${dataId}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["AdminSecrets", "Secrets"],
+      invalidatesTags: ["AdminData", "Data"],
     }),
   }),
 });
@@ -104,7 +104,7 @@ export const {
   useGetUserByIdQuery,
   useUpdateUserRoleMutation,
   useDeleteUserMutation,
-  useGetAllSecretsQuery,
-  useGetUserSecretsQuery,
-  useDeleteAnySecretMutation,
+  useGetAllDataQuery,
+  useGetUserDataQuery,
+  useDeleteAnyDataMutation,
 } = adminApi;

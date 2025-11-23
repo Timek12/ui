@@ -22,7 +22,7 @@ export const authApi = api.injectEndpoints({
       }),
     }),
 
-    // Login with email and password (SECURE - credentials in body)
+    // Login with email and password
     login: builder.mutation<LoginResponse, LoginCredentials>({
       query: (credentials) => ({
         url: "/auth/login",

@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import AdminSecretsPage from "./components/admin/AdminSecretsPage";
+import AdminDataPage from "./components/admin/AdminDataPage";
 import UsersManagementPage from "./components/admin/UsersManagementPage";
 import AdminRoute from "./components/auth/AdminRoute";
 import LoginPage from "./components/auth/LoginPage";
@@ -10,9 +10,9 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import RegisterPage from "./components/auth/RegisterPage";
 import DebugLogs from "./components/common/DebugLogs";
 import DashboardHome from "./components/dashboard/DashboardHome";
+import { CreateDataPage } from "./components/data/CreateDataPage";
+import DataPage from "./components/data/DataPage";
 import DashboardLayout from "./components/layout/DashboardLayout";
-import { CreateSecretPage } from "./components/secrets/CreateSecretPage";
-import SecretsPage from "./components/secrets/SecretsPage";
 import VaultPage from "./components/vault/VaultPage";
 import "./index.css";
 import { store } from "./store";
@@ -35,13 +35,13 @@ function App() {
             }
           >
             <Route index element={<DashboardHome />} />
-            <Route path="secrets" element={<SecretsPage />} />
-            <Route path="create-secret" element={<CreateSecretPage />} />
+            <Route path="data" element={<DataPage />} />
+            <Route path="create-data" element={<CreateDataPage />} />
             <Route
-              path="all-secrets"
+              path="all-data"
               element={
                 <AdminRoute>
-                  <AdminSecretsPage />
+                  <AdminDataPage />
                 </AdminRoute>
               }
             />

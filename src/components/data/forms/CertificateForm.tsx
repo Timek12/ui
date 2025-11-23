@@ -3,18 +3,33 @@ import React, { useState } from "react";
 interface CertificateFormProps {
   onSubmit: (data: any) => void;
   onCancel: () => void;
+  isEditing?: boolean;
+  initialData?: {
+    name?: string;
+    description?: string;
+    certificate?: string;
+    privateKey?: string;
+    chain?: string;
+    passphrase?: string;
+  };
 }
 
 export const CertificateForm: React.FC<CertificateFormProps> = ({
   onSubmit,
   onCancel,
+  isEditing = false,
+  initialData,
 }) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [certificate, setCertificate] = useState("");
-  const [privateKey, setPrivateKey] = useState("");
-  const [chain, setChain] = useState("");
-  const [passphrase, setPassphrase] = useState("");
+  const [name, setName] = useState(initialData?.name || "");
+  const [description, setDescription] = useState(
+    initialData?.description || ""
+  );
+  const [certificate, setCertificate] = useState(
+    initialData?.certificate || ""
+  );
+  const [privateKey, setPrivateKey] = useState(initialData?.privateKey || "");
+  const [chain, setChain] = useState(initialData?.chain || "");
+  const [passphrase, setPassphrase] = useState(initialData?.passphrase || "");
   const [showPassphrase, setShowPassphrase] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -125,7 +140,7 @@ export const CertificateForm: React.FC<CertificateFormProps> = ({
           type="submit"
           className="flex-1 bg-primary-600 dark:bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
         >
-          Create Certificate
+          {isEditing ? "Update Secret" : "Create Secret"}
         </button>
         <button
           type="button"

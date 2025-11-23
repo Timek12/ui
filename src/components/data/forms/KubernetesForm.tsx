@@ -1,49 +1,66 @@
+import { Plus, X } from "lucide-react";
 import React, { useState } from "react";
 
-interface ApiKeyFormProps {
+interface KubernetesFormProps {
   onSubmit: (data: any) => void;
   onCancel: () => void;
+  isEditing?: boolean;
+  initialData?: {
+    name?: string;
+    description?: string;
+    namespace?: string;
+    data?: Array<{ key: string; value: string }>;
+  };
 }
 
-export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
+export const KubernetesForm: React.FC<KubernetesFormProps> = ({
   onSubmit,
   onCancel,
+  isEditing = false,
+  initialData,
 }) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [apiKey, setApiKey] = useState("");
-  const [headers, setHeaders] = useState<{ key: string; value: string }[]>([
-    { key: "", value: "" },
-  ]);
-  const [showKey, setShowKey] = useState(false);
+  const [name, setName] = useState(initialData?.name || "");
+  const [description, setDescription] = useState(
+    initialData?.description || ""
+  );
+  const [namespace, setNamespace] = useState(
+    initialData?.namespace || "default"
+  );
+  const [data, setData] = useState<Array<{ key: string; value: string }>>(
+    initialData?.data && initialData.data.length > 0
+      ? initialData.data
+      : [{ key: "", value: "" }]
+  );
 
-  const addHeader = () => {
-    setHeaders([...headers, { key: "", value: "" }]);
+  const addDataField = () => {
+    setData([...data, { key: "", value: "" }]);
   };
 
-  const removeHeader = (index: number) => {
-    setHeaders(headers.filter((_, i) => i !== index));
+  const removeDataField = (index: number) => {
+    if (data.length > 1) {
+      setData(data.filter((_, i) => i !== index));
+    }
   };
 
-  const updateHeader = (
+  const updateDataField = (
     index: number,
     field: "key" | "value",
     value: string
   ) => {
-    const updated = [...headers];
-    updated[index][field] = value;
-    setHeaders(updated);
+    const newData = data.map((d, i) =>
+      i === index ? { ...d, [field]: value } : d
+    );
+    setData(newData);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const nonEmptyHeaders = headers.filter((h) => h.key.trim());
     onSubmit({
-      type: "api_key",
+      type: "kubernetes",
       name,
       description,
-      apiKey,
-      headers: nonEmptyHeaders.length > 0 ? nonEmptyHeaders : undefined,
+      namespace,
+      data: data.filter((d) => d.key && d.value),
     });
   };
 
@@ -59,7 +76,7 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
           onChange={(e) => setName(e.target.value)}
           required
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500"
-          placeholder="e.g., Stripe API Key"
+          placeholder="e.g., my-k8s-config"
         />
       </div>
 
@@ -77,65 +94,59 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          API Key *
+          Namespace
         </label>
-        <div className="relative">
-          <input
-            type={showKey ? "text" : "password"}
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            required
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500"
-            placeholder="sk_live_..."
-          />
-          <button
-            type="button"
-            onClick={() => setShowKey(!showKey)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-          >
-            {showKey ? "Hide" : "Show"}
-          </button>
-        </div>
+        <input
+          type="text"
+          value={namespace}
+          onChange={(e) => setNamespace(e.target.value)}
+          required
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500"
+          placeholder="default"
+        />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Custom Headers (Optional)
+          Data (Key-Value Pairs) *
         </label>
         <div className="space-y-2">
-          {headers.map((header, index) => (
+          {data.map((field, index) => (
             <div key={index} className="flex gap-2">
               <input
                 type="text"
-                value={header.key}
-                onChange={(e) => updateHeader(index, "key", e.target.value)}
-                placeholder="Header name"
+                value={field.key}
+                onChange={(e) => updateDataField(index, "key", e.target.value)}
+                placeholder="Key"
                 className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500"
               />
               <input
                 type="text"
-                value={header.value}
-                onChange={(e) => updateHeader(index, "value", e.target.value)}
-                placeholder="Header value"
+                value={field.value}
+                onChange={(e) =>
+                  updateDataField(index, "value", e.target.value)
+                }
+                placeholder="Value"
                 className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500"
               />
-              {headers.length > 1 && (
+              {data.length > 1 && (
                 <button
                   type="button"
-                  onClick={() => removeHeader(index)}
-                  className="px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg"
+                  onClick={() => removeDataField(index)}
+                  className="px-3 py-2 text-red-600 hover:text-red-700 dark:text-red-400"
                 >
-                  ✕
+                  <X size={20} />
                 </button>
               )}
             </div>
           ))}
           <button
             type="button"
-            onClick={addHeader}
-            className="text-sm text-primary-600 hover:text-primary-700"
+            onClick={addDataField}
+            className="flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:text-primary-700 text-sm"
           >
-            + Add Header
+            <Plus size={16} />
+            Add Field
           </button>
         </div>
       </div>
@@ -145,7 +156,7 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
           type="submit"
           className="flex-1 bg-primary-600 dark:bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
         >
-          Create API Key
+          {isEditing ? "Update Secret" : "Create Secret"}
         </button>
         <button
           type="button"

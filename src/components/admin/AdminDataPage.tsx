@@ -1,32 +1,32 @@
 import { Key, Shield, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 import {
-  useDeleteAnySecretMutation,
-  useGetAllSecretsQuery,
+  useDeleteAnyDataMutation,
+  useGetAllDataQuery,
 } from "../../services/adminApi";
 import Alert from "../common/Alert";
 import LoadingSpinner from "../common/LoadingSpinner";
 import Modal from "../common/Modal";
 
-const AdminSecretsPage: React.FC = () => {
-  const { data: secrets, isLoading, error } = useGetAllSecretsQuery();
-  const [deleteSecret] = useDeleteAnySecretMutation();
+const AdminDataPage: React.FC = () => {
+  const { data: dataItems, isLoading, error } = useGetAllDataQuery();
+  const [deleteData] = useDeleteAnyDataMutation();
 
-  const [selectedSecret, setSelectedSecret] = useState<string | null>(null);
+  const [selectedData, setSelectedData] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
 
-  const handleDeleteSecret = async () => {
-    if (!selectedSecret) return;
+  const handleDeleteData = async () => {
+    if (!selectedData) return;
 
     try {
-      await deleteSecret(selectedSecret).unwrap();
+      await deleteData(selectedData).unwrap();
       setMessage({ type: "success", text: "Secret deleted successfully" });
       setShowDeleteModal(false);
-      setSelectedSecret(null);
+      setSelectedData(null);
       setTimeout(() => setMessage(null), 3000);
     } catch (err: any) {
       setMessage({
@@ -57,9 +57,11 @@ const AdminSecretsPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Secrets Management
+            Secret Management
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-2">View and manage all user secrets</p>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">
+            View and manage all user secrets
+          </p>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
           <Shield className="w-4 h-4" />
@@ -78,7 +80,7 @@ const AdminSecretsPage: React.FC = () => {
       <div className="card">
         <div className="mb-4">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            All Secrets ({secrets?.length || 0})
+            All Secrets ({dataItems?.length || 0})
           </h2>
         </div>
 
@@ -110,41 +112,41 @@ const AdminSecretsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {secrets?.map((secret) => (
-                <tr key={secret.id} className="hover:bg-gray-50 dark:bg-gray-700">
+              {dataItems?.map((item) => (
+                <tr key={item.id} className="hover:bg-gray-50 dark:bg-gray-700">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <Key className="w-4 h-4 text-gray-400 mr-2" />
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
-                        {secret.name}
+                        {item.name}
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-gray-900 dark:text-white max-w-xs truncate">
-                      {secret.description || "No description"}
+                      {item.description || "No description"}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900 dark:text-white">
-                      {secret.user_id}
+                      {item.user_id}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded">
-                      v{secret.version}
+                      v{item.version}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(secret.created_at).toLocaleDateString("en-GB")}
+                    {new Date(item.created_at).toLocaleDateString("pl-PL")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(secret.updated_at).toLocaleDateString("en-GB")}
+                    {new Date(item.updated_at).toLocaleDateString("pl-PL")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
                       onClick={() => {
-                        setSelectedSecret(secret.id);
+                        setSelectedData(item.id);
                         setShowDeleteModal(true);
                       }}
                       className="text-red-600 hover:text-red-900"
@@ -159,7 +161,7 @@ const AdminSecretsPage: React.FC = () => {
           </table>
         </div>
 
-        {secrets && secrets.length === 0 && (
+        {dataItems && dataItems.length === 0 && (
           <div className="text-center py-12">
             <Key className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500 dark:text-gray-400">No secrets found</p>
@@ -172,7 +174,7 @@ const AdminSecretsPage: React.FC = () => {
         isOpen={showDeleteModal}
         onClose={() => {
           setShowDeleteModal(false);
-          setSelectedSecret(null);
+          setSelectedData(null);
         }}
         title="Delete Secret"
       >
@@ -185,13 +187,13 @@ const AdminSecretsPage: React.FC = () => {
             <button
               onClick={() => {
                 setShowDeleteModal(false);
-                setSelectedSecret(null);
+                setSelectedData(null);
               }}
               className="btn-secondary"
             >
               Cancel
             </button>
-            <button onClick={handleDeleteSecret} className="btn-danger">
+            <button onClick={handleDeleteData} className="btn-danger">
               Delete Secret
             </button>
           </div>
@@ -201,4 +203,4 @@ const AdminSecretsPage: React.FC = () => {
   );
 };
 
-export default AdminSecretsPage;
+export default AdminDataPage;

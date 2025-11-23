@@ -1,21 +1,38 @@
 import { Plus, X } from "lucide-react";
 import React, { useState } from "react";
 
-interface TextSecretFormProps {
+interface TextDataFormProps {
   onSubmit: (data: any) => void;
   onCancel: () => void;
+  isEditing?: boolean;
+  initialData?: {
+    name?: string;
+    description?: string;
+    fields?: Array<{ key: string; value: string }>;
+    ttl?: number;
+  };
 }
 
-export const TextSecretForm: React.FC<TextSecretFormProps> = ({
+export const TextDataForm: React.FC<TextDataFormProps> = ({
   onSubmit,
   onCancel,
+  isEditing = false,
+  initialData,
 }) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [fields, setFields] = useState<Array<{ key: string; value: string }>>([
-    { key: "", value: "" },
-  ]);
-  const [ttl, setTtl] = useState<string>("");
+  const [name, setName] = useState(initialData?.name || "");
+  const [description, setDescription] = useState(
+    initialData?.description || ""
+  );
+  const [fields, setFields] = useState<Array<{ key: string; value: string }>>(
+    initialData?.fields && initialData.fields.length > 0
+      ? initialData.fields
+      : [{ key: "", value: "" }]
+  );
+  const [ttl, setTtl] = useState<string>(
+    initialData?.ttl !== undefined && initialData?.ttl !== null
+      ? String(initialData.ttl / 3600)
+      : ""
+  );
   const [ttlUnit, setTtlUnit] = useState<"minutes" | "hours" | "days">("hours");
 
   const addField = () => {
@@ -33,8 +50,9 @@ export const TextSecretForm: React.FC<TextSecretFormProps> = ({
     field: "key" | "value",
     value: string
   ) => {
-    const newFields = [...fields];
-    newFields[index][field] = value;
+    const newFields = fields.map((f, i) =>
+      i === index ? { ...f, [field]: value } : f
+    );
     setFields(newFields);
   };
 
@@ -57,7 +75,6 @@ export const TextSecretForm: React.FC<TextSecretFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Name */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Secret Name *
@@ -68,11 +85,10 @@ export const TextSecretForm: React.FC<TextSecretFormProps> = ({
           onChange={(e) => setName(e.target.value)}
           required
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          placeholder="my-secret"
+          placeholder="my-data"
         />
       </div>
 
-      {/* Description */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Description
@@ -86,7 +102,6 @@ export const TextSecretForm: React.FC<TextSecretFormProps> = ({
         />
       </div>
 
-      {/* Key-Value Fields */}
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="block text-sm font-medium text-gray-700">
@@ -135,7 +150,6 @@ export const TextSecretForm: React.FC<TextSecretFormProps> = ({
         </div>
       </div>
 
-      {/* TTL (Optional) */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Time To Live (Optional)
@@ -163,18 +177,17 @@ export const TextSecretForm: React.FC<TextSecretFormProps> = ({
         </div>
         {ttl && (
           <p className="mt-1 text-sm text-gray-500">
-            Secret will expire in {ttl} {ttlUnit}
+            Data will expire in {ttl} {ttlUnit}
           </p>
         )}
       </div>
 
-      {/* Actions */}
       <div className="flex gap-3 pt-4">
         <button
           type="submit"
           className="flex-1 bg-primary-600 dark:bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors"
         >
-          Create Secret
+          {isEditing ? "Update Secret" : "Create Secret"}
         </button>
         <button
           type="button"

@@ -69,3 +69,15 @@ export interface TokenVerificationResponse {
   email?: string;
   expires_at?: number;
 }
+
+export interface Session {
+  jti: string;
+  user_id: number;
+  device?: string;
+  ip_address?: string;
+  created_at: string;
+  expires_at: string;
+  is_current: boolean;
+}
+
+export type SessionsResponse = Session[];

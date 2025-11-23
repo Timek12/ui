@@ -1,13 +1,16 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCreateDataMutation } from "../../services/dataApi";
+import type { DataCreateRequest } from "../../types/data.types";
+import Alert from "../common/Alert";
 import { ApiKeyForm } from "./forms/ApiKeyForm";
 import { CertificateForm } from "./forms/CertificateForm";
 import { CredentialsForm } from "./forms/CredentialsForm";
 import { KubernetesForm } from "./forms/KubernetesForm";
 import { SshKeyForm } from "./forms/SshKeyForm";
-import { TextSecretForm } from "./forms/TextSecretForm";
+import { TextDataForm } from "./forms/TextDataForm";
 
-type SecretType =
+type DataType =
   | "text_with_ttl"
   | "kubernetes"
   | "credentials"
@@ -15,14 +18,14 @@ type SecretType =
   | "ssh_key"
   | "certificate";
 
-interface SecretTypeOption {
-  value: SecretType;
+interface DataTypeOption {
+  value: DataType;
   label: string;
   description: string;
   icon: string;
 }
 
-const SECRET_TYPES: SecretTypeOption[] = [
+const DATA_TYPES: DataTypeOption[] = [
   {
     value: "text_with_ttl",
     label: "Text with optional TTL",
@@ -32,7 +35,7 @@ const SECRET_TYPES: SecretTypeOption[] = [
   {
     value: "kubernetes",
     label: "Kubernetes Secret",
-    description: "Configuration data for K8s deployments",
+    description: "Configuration secrets for K8s deployments",
     icon: "☸️",
   },
   {
@@ -61,33 +64,116 @@ const SECRET_TYPES: SecretTypeOption[] = [
   },
 ];
 
-export const CreateSecretPage: React.FC = () => {
+export const CreateDataPage: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedType, setSelectedType] = useState<SecretType | null>(null);
+  const [createData] = useCreateDataMutation();
+  const [selectedType, setSelectedType] = useState<DataType | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const typeToLabel = useMemo(
+    () =>
+      DATA_TYPES.reduce<Record<DataType, string>>((acc, item) => {
+        acc[item.value] = item.label;
+        return acc;
+      }, {} as Record<DataType, string>),
+    []
+  );
 
   const handleSubmit = async (data: any) => {
-    console.log("Creating secret:", data);
-    // Mock API call - will be replaced with actual RTK Query mutation
-    alert(
-      `Secret "${data.name}" of type "${data.type}" created successfully! (Mocked)`
-    );
-    navigate("/dashboard/secrets");
+    try {
+      setError(null);
+      const request = mapFormDataToRequest(data);
+      await createData(request).unwrap();
+      navigate("/dashboard/data");
+    } catch (err: any) {
+      console.error("Failed to create data", err);
+      setError(
+        err?.data?.detail || "Failed to create secret. Please try again."
+      );
+    }
   };
 
   const handleCancel = () => {
     if (selectedType) {
       setSelectedType(null);
+      setError(null);
     } else {
-      navigate("/dashboard/secrets");
+      navigate("/dashboard/data");
     }
+  };
+
+  const mapFormDataToRequest = (formData: any): DataCreateRequest => {
+    const { type, name, description, ttl, ...rest } = formData;
+
+    const normalizeOptional = (value?: string) =>
+      typeof value === "string" && value.trim() ? value : undefined;
+
+    const request: DataCreateRequest = {
+      name,
+      data_type: type,
+      ...(normalizeOptional(description) && {
+        description: normalizeOptional(description),
+      }),
+    };
+
+    switch (type as DataType) {
+      case "text_with_ttl": {
+        request.fields = rest.fields ?? [];
+        if (typeof ttl === "number" && ttl > 0) {
+          request.ttl = ttl;
+        }
+        break;
+      }
+      case "kubernetes": {
+        request.namespace = rest.namespace;
+        request.data = rest.data ?? [];
+        break;
+      }
+      case "credentials": {
+        request.username = rest.username;
+        request.password = rest.password;
+        const url = normalizeOptional(rest.url);
+        if (url) request.url = url;
+        break;
+      }
+      case "api_key": {
+        request.apiKey = rest.apiKey;
+        break;
+      }
+      case "ssh_key": {
+        request.privateKey = rest.privateKey;
+        const publicKey = normalizeOptional(rest.publicKey);
+        const passphrase = normalizeOptional(rest.passphrase);
+        const host = normalizeOptional(rest.host);
+        const username = normalizeOptional(rest.username);
+
+        if (publicKey) request.publicKey = publicKey;
+        if (passphrase) request.passphrase = passphrase;
+        if (host) request.host = host;
+        if (username) request.username = username;
+        break;
+      }
+      case "certificate": {
+        request.certificate = rest.certificate;
+        request.privateKey = rest.privateKey;
+        const chain = normalizeOptional(rest.chain);
+        const passphrase = normalizeOptional(rest.passphrase);
+
+        if (chain) request.chain = chain;
+        if (passphrase) request.passphrase = passphrase;
+        break;
+      }
+      default:
+        break;
+    }
+
+    return request;
   };
 
   const renderForm = () => {
     switch (selectedType) {
       case "text_with_ttl":
-        return (
-          <TextSecretForm onSubmit={handleSubmit} onCancel={handleCancel} />
-        );
+        return <TextDataForm onSubmit={handleSubmit} onCancel={handleCancel} />;
       case "kubernetes":
         return (
           <KubernetesForm onSubmit={handleSubmit} onCancel={handleCancel} />
@@ -116,13 +202,23 @@ export const CreateSecretPage: React.FC = () => {
           Create New Secret
         </h1>
 
+        {error && (
+          <div className="mb-4">
+            <Alert
+              type="error"
+              message={error}
+              onClose={() => setError(null)}
+            />
+          </div>
+        )}
+
         {!selectedType ? (
           <div>
             <p className="text-gray-600 dark:text-gray-300 mb-6">
               Select the type of secret you want to create:
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {SECRET_TYPES.map((type) => (
+              {DATA_TYPES.map((type) => (
                 <button
                   key={type.value}
                   onClick={() => setSelectedType(type.value)}
@@ -141,7 +237,7 @@ export const CreateSecretPage: React.FC = () => {
               ))}
             </div>
             <button
-              onClick={() => navigate("/dashboard/secrets")}
+              onClick={() => navigate("/dashboard/data")}
               className="mt-6 px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
             >
               ← Back to Secrets
@@ -159,9 +255,7 @@ export const CreateSecretPage: React.FC = () => {
               <span className="text-gray-400 dark:text-gray-500">|</span>
               <span className="text-gray-600 dark:text-gray-300">
                 Creating:{" "}
-                <strong>
-                  {SECRET_TYPES.find((t) => t.value === selectedType)?.label}
-                </strong>
+                <strong>{selectedType ? typeToLabel[selectedType] : ""}</strong>
               </span>
             </div>
             {renderForm()}

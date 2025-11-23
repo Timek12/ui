@@ -3,17 +3,29 @@ import React, { useState } from "react";
 interface CredentialsFormProps {
   onSubmit: (data: any) => void;
   onCancel: () => void;
+  isEditing?: boolean;
+  initialData?: {
+    name?: string;
+    description?: string;
+    username?: string;
+    password?: string;
+    url?: string;
+  };
 }
 
 export const CredentialsForm: React.FC<CredentialsFormProps> = ({
   onSubmit,
   onCancel,
+  isEditing = false,
+  initialData,
 }) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [url, setUrl] = useState("");
+  const [name, setName] = useState(initialData?.name || "");
+  const [description, setDescription] = useState(
+    initialData?.description || ""
+  );
+  const [username, setUsername] = useState(initialData?.username || "");
+  const [password, setPassword] = useState(initialData?.password || "");
+  const [url, setUrl] = useState(initialData?.url || "");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -109,7 +121,7 @@ export const CredentialsForm: React.FC<CredentialsFormProps> = ({
           type="submit"
           className="flex-1 bg-primary-600 dark:bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
         >
-          Create Credentials
+          {isEditing ? "Update Secret" : "Create Secret"}
         </button>
         <button
           type="button"

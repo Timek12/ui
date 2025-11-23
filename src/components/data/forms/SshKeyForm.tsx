@@ -3,19 +3,33 @@ import React, { useState } from "react";
 interface SshKeyFormProps {
   onSubmit: (data: any) => void;
   onCancel: () => void;
+  isEditing?: boolean;
+  initialData?: {
+    name?: string;
+    description?: string;
+    privateKey?: string;
+    publicKey?: string;
+    passphrase?: string;
+    host?: string;
+    username?: string;
+  };
 }
 
 export const SshKeyForm: React.FC<SshKeyFormProps> = ({
   onSubmit,
   onCancel,
+  isEditing = false,
+  initialData,
 }) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [privateKey, setPrivateKey] = useState("");
-  const [publicKey, setPublicKey] = useState("");
-  const [passphrase, setPassphrase] = useState("");
-  const [host, setHost] = useState("");
-  const [username, setUsername] = useState("");
+  const [name, setName] = useState(initialData?.name || "");
+  const [description, setDescription] = useState(
+    initialData?.description || ""
+  );
+  const [privateKey, setPrivateKey] = useState(initialData?.privateKey || "");
+  const [publicKey, setPublicKey] = useState(initialData?.publicKey || "");
+  const [passphrase, setPassphrase] = useState(initialData?.passphrase || "");
+  const [host, setHost] = useState(initialData?.host || "");
+  const [username, setUsername] = useState(initialData?.username || "");
   const [showPassphrase, setShowPassphrase] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -140,7 +154,7 @@ export const SshKeyForm: React.FC<SshKeyFormProps> = ({
           type="submit"
           className="flex-1 bg-primary-600 dark:bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
         >
-          Create SSH Key
+          {isEditing ? "Update Secret" : "Create Secret"}
         </button>
         <button
           type="button"

@@ -29,7 +29,7 @@ export const vaultApi = api.injectEndpoints({
         method: "POST",
         body: request,
       }),
-      invalidatesTags: ["Vault", "Secrets"],
+      invalidatesTags: ["Vault", "Data"],
     }),
 
     // Seal vault (admin only)
@@ -38,7 +38,7 @@ export const vaultApi = api.injectEndpoints({
         url: "/api/crypto/seal",
         method: "POST",
       }),
-      invalidatesTags: ["Vault", "Secrets"],
+      invalidatesTags: ["Vault", "Data"],
     }),
 
     // Get vault status

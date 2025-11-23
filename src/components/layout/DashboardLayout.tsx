@@ -57,11 +57,11 @@ const DashboardLayout: React.FC = () => {
 
   const navItems = [
     { to: "/dashboard", icon: Shield, label: "Dashboard" },
-    { to: "/dashboard/secrets", icon: Key, label: "Secrets" },
-    { to: "/dashboard/create-secret", icon: Key, label: "Create Secret" },
+    { to: "/dashboard/data", icon: Key, label: "Data" },
+    { to: "/dashboard/create-data", icon: Key, label: "Create Data" },
     ...(isAdmin
       ? [
-          { to: "/dashboard/all-secrets", icon: Key, label: "All Secrets" },
+          { to: "/dashboard/all-data", icon: Key, label: "All Data" },
           { to: "/dashboard/vault", icon: Lock, label: "Vault Management" },
           { to: "/dashboard/users", icon: Users, label: "User Management" },
         ]
