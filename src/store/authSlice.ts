@@ -33,16 +33,10 @@ const authSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
       state.isAuthenticated = true;
-
-      // Persist tokens and user
-      localStorage.setItem("access_token", action.payload.accessToken);
-      localStorage.setItem("refresh_token", action.payload.refreshToken);
-      localStorage.setItem("user", JSON.stringify(action.payload.user));
     },
 
     setAccessToken: (state, action: PayloadAction<string>) => {
       state.accessToken = action.payload;
-      localStorage.setItem("access_token", action.payload);
     },
 
     logout: (state) => {
@@ -50,11 +44,6 @@ const authSlice = createSlice({
       state.accessToken = null;
       state.refreshToken = null;
       state.isAuthenticated = false;
-
-      // Clear persisted tokens and user
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-      localStorage.removeItem("user");
     },
   },
 });
