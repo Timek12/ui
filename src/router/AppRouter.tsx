@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import AdminDataPage from "../components/admin/AdminDataPage";
 import UsersManagementPage from "../components/admin/UsersManagementPage";
+import AuditDashboard from "../components/audit/AuditDashboard";
 import AdminRoute from "../components/auth/AdminRoute";
 import LoginPage from "../components/auth/LoginPage";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
@@ -54,6 +55,7 @@ export const AppRouter = () => {
             </AdminRoute>
           }
         />
+        <Route path="audit" element={<AuditDashboard />} />
       </Route>
 
       <Route path="/" element={<Navigate to="/dashboard" replace />} />

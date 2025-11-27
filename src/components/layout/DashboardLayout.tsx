@@ -1,6 +1,7 @@
 import {
-  Key,
-  Lock,
+  Database,
+  FileText,
+  LayoutDashboard,
   LogOut,
   Moon,
   Shield,
@@ -15,6 +16,14 @@ import { api } from "../../services/api";
 import { useLogoutMutation } from "../../services/authApi";
 import { RootState } from "../../store";
 import { logout } from "../../store/authSlice";
+
+const navItems = [
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/dashboard/data", label: "Data", icon: Database },
+  { to: "/dashboard/audit", label: "Audit", icon: FileText },
+  { to: "/dashboard/users", label: "Users", icon: Users, adminOnly: true },
+  { to: "/dashboard/vault", label: "Vault", icon: Shield, adminOnly: true },
+];
 
 const DashboardLayout: React.FC = () => {
   const dispatch = useDispatch();
@@ -52,22 +61,11 @@ const DashboardLayout: React.FC = () => {
     }
   };
 
+  const filteredNavItems = navItems.filter(
+    (item) => !item.adminOnly || user?.role === "admin"
+  );
+
   // Only show admin features
-  const isAdmin = user?.role === "admin";
-
-  const navItems = [
-    { to: "/dashboard", icon: Shield, label: "Dashboard" },
-    { to: "/dashboard/data", icon: Key, label: "Data" },
-    { to: "/dashboard/create-data", icon: Key, label: "Create Data" },
-    ...(isAdmin
-      ? [
-          { to: "/dashboard/all-data", icon: Key, label: "All Data" },
-          { to: "/dashboard/vault", icon: Lock, label: "Vault Management" },
-          { to: "/dashboard/users", icon: Users, label: "User Management" },
-        ]
-      : []),
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Top Navigation */}
@@ -117,7 +115,7 @@ const DashboardLayout: React.FC = () => {
           <aside className="w-64 flex-shrink-0">
             <div className="card dark:bg-gray-800 dark:border-gray-700">
               <nav className="space-y-1">
-                {navItems.map((item) => (
+                {filteredNavItems.map((item) => (
                   <NavLink
                     key={item.to}
                     to={item.to}
