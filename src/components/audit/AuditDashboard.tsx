@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
     Bar,
@@ -18,12 +18,23 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'
 
 const AuditDashboard: React.FC = () => {
   const [page, setPage] = useState(0);
+  const [autoRefreshInterval, setAutoRefreshInterval] = useState<number>(0); // 0 = off
   const limit = 100; // Fetch more for better stats
   
-  const { data, isLoading, error } = useGetLogsQuery({ 
+  const { data, isLoading, error, refetch } = useGetLogsQuery({ 
     limit, 
     offset: page * limit 
   });
+  
+  // Auto-refresh logic
+  useEffect(() => {
+    if (autoRefreshInterval > 0) {
+      const interval = setInterval(() => {
+        refetch();
+      }, autoRefreshInterval);
+      return () => clearInterval(interval);
+    }
+  }, [autoRefreshInterval, refetch]);
   
   const user = useSelector((state: RootState) => state.auth.user);
 
@@ -104,9 +115,36 @@ const AuditDashboard: React.FC = () => {
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">{user?.role === 'admin' ? 'Audit Dashboard' : 'My Activity'}</h1>
-        <div className="text-sm text-gray-600">
-          Viewing as: {user?.email} ({user?.role})
+        <div>
+            <h1 className="text-2xl font-bold">{user?.role === 'admin' ? 'Audit Dashboard' : 'My Activity'}</h1>
+            <div className="text-sm text-gray-600">
+            Viewing as: {user?.email} ({user?.role})
+            </div>
+        </div>
+        <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600">Auto-refresh:</span>
+                <select 
+                    className="border rounded p-1 text-sm"
+                    value={autoRefreshInterval}
+                    onChange={(e) => setAutoRefreshInterval(Number(e.target.value))}
+                >
+                    <option value={0}>Off</option>
+                    <option value={5000}>5s</option>
+                    <option value={10000}>10s</option>
+                    <option value={30000}>30s</option>
+                    <option value={60000}>1m</option>
+                </select>
+            </div>
+            <button 
+                onClick={() => refetch()}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors flex items-center"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh
+            </button>
         </div>
       </div>
 

@@ -22,7 +22,7 @@ const DashboardHome: React.FC = () => {
 
   const stats = [
     {
-      title: "Total Data",
+      title: "Total Secrets",
       value: dataItems?.length || 0,
       icon: Key,
       color: "bg-blue-500",
@@ -40,7 +40,7 @@ const DashboardHome: React.FC = () => {
         ]
       : []),
     {
-      title: "Active Data",
+      title: "Active Secrets",
       value: dataItems?.filter((s) => s.is_active).length || 0,
       icon: Activity,
       color: "bg-purple-500",
@@ -140,7 +140,7 @@ const DashboardHome: React.FC = () => {
       <div className="card">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Recent Data
+            Recent Secrets
           </h2>
           <Link
             to="/dashboard/data"
@@ -178,12 +178,12 @@ const DashboardHome: React.FC = () => {
         ) : (
           <div className="text-center py-8">
             <Key className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No data yet</p>
+            <p className="text-gray-500">No secrets yet</p>
             <Link
               to="/dashboard/create-data"
               className="text-primary-600 hover:text-primary-700 text-sm font-medium mt-2 inline-block"
             >
-              Create your first data
+              Create your first secret
             </Link>
           </div>
         )}

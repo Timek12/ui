@@ -1,13 +1,13 @@
 import {
-  Database,
-  FileText,
-  LayoutDashboard,
-  LogOut,
-  Moon,
-  Shield,
-  Sun,
-  User,
-  Users,
+    Database,
+    FileText,
+    LayoutDashboard,
+    LogOut,
+    Moon,
+    Shield,
+    Sun,
+    User,
+    Users,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,7 +19,7 @@ import { logout } from "../../store/authSlice";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/dashboard/data", label: "Data", icon: Database },
+  { to: "/dashboard/data", label: "Secrets", icon: Database },
   { to: "/dashboard/audit", label: "Audit", icon: FileText },
   { to: "/dashboard/users", label: "Users", icon: Users, adminOnly: true },
   { to: "/dashboard/vault", label: "Vault", icon: Shield, adminOnly: true },
