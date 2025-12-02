@@ -1,13 +1,16 @@
 import {
+    ChevronLeft,
+    ChevronRight,
     Database,
     FileText,
+    Folder,
     LayoutDashboard,
     LogOut,
     Moon,
     Shield,
     Sun,
     User,
-    Users,
+    Users
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,6 +23,7 @@ import { logout } from "../../store/authSlice";
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/dashboard/data", label: "Secrets", icon: Database },
+  { to: "/dashboard/projects", label: "Projects", icon: Folder },
   { to: "/dashboard/audit", label: "Audit", icon: FileText },
   { to: "/dashboard/users", label: "Users", icon: Users, adminOnly: true },
   { to: "/dashboard/vault", label: "Vault", icon: Shield, adminOnly: true },
@@ -35,6 +39,9 @@ const DashboardLayout: React.FC = () => {
   const [logoutApi] = useLogoutMutation();
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem("darkMode") === "true";
+  });
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    return localStorage.getItem("sidebarCollapsed") === "true";
   });
 
   useEffect(() => {
@@ -61,20 +68,28 @@ const DashboardLayout: React.FC = () => {
     }
   };
 
+  const toggleSidebar = () => {
+    const newState = !sidebarCollapsed;
+    setSidebarCollapsed(newState);
+    localStorage.setItem("sidebarCollapsed", newState.toString());
+  };
+
   const filteredNavItems = navItems.filter(
     (item) => !item.adminOnly || user?.role === "admin"
   );
 
   // Only show admin features
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen">
       {/* Top Navigation */}
-      <nav className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="bg-white/80 dark:bg-gray-800/60 backdrop-blur-xl shadow-sm border-b border-white/20 dark:border-gray-700/50 sticky top-0 z-50">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Shield className="w-8 h-8 text-primary-600 dark:text-primary-400" />
-              <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">
+              <div className="bg-gradient-to-tr from-primary-600 to-primary-400 p-2 rounded-lg shadow-lg shadow-primary-500/20 mr-3">
+                <Shield className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300">
                 Luna
               </span>
             </div>
@@ -82,7 +97,7 @@ const DashboardLayout: React.FC = () => {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setDarkMode(!darkMode)}
-                className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="p-2 text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-white/10 rounded-lg transition-colors"
                 aria-label="Toggle dark mode"
               >
                 {darkMode ? (
@@ -91,15 +106,15 @@ const DashboardLayout: React.FC = () => {
                   <Moon className="w-5 h-5" />
                 )}
               </button>
-              <div className="flex items-center gap-2">
-                <User className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10">
+                <User className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
                   {user?.name || user?.email}
                 </span>
               </div>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
               >
                 <LogOut className="w-4 h-4" />
                 Logout
@@ -109,27 +124,41 @@ const DashboardLayout: React.FC = () => {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-6">
           {/* Sidebar */}
-          <aside className="w-64 flex-shrink-0">
-            <div className="card dark:bg-gray-800 dark:border-gray-700">
-              <nav className="space-y-1">
+          <aside className={`flex-shrink-0 transition-all duration-300 ${sidebarCollapsed ? 'w-16' : 'w-64'}`}>
+            <div className="bg-white/80 dark:bg-gray-800/60 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/50 relative min-h-[calc(100vh-8rem)]">
+              {/* Toggle Button */}
+              <button
+                onClick={toggleSidebar}
+                className="absolute -right-3 top-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full p-1.5 shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors z-10 text-primary-600 dark:text-primary-400"
+                aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              >
+                {sidebarCollapsed ? (
+                  <ChevronRight className="w-3 h-3" />
+                ) : (
+                  <ChevronLeft className="w-3 h-3" />
+                )}
+              </button>
+
+              <nav className="p-3 space-y-1">
                 {filteredNavItems.map((item) => (
                   <NavLink
                     key={item.to}
                     to={item.to}
                     end={item.to === "/dashboard"}
+                    title={sidebarCollapsed ? item.label : undefined}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      `flex items-center rounded-xl transition-all duration-200 ${
                         isActive
-                          ? "bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 font-medium"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      }`
+                          ? "bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-lg shadow-primary-500/25"
+                          : "text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-white/5 hover:text-primary-600 dark:hover:text-primary-400"
+                      } ${sidebarCollapsed ? 'justify-center py-3' : 'gap-3 px-4 py-3'}`
                     }
                   >
-                    <item.icon className="w-5 h-5" />
-                    {item.label}
+                    <item.icon className={`w-5 h-5 flex-shrink-0 ${sidebarCollapsed ? '' : ''}`} />
+                    {!sidebarCollapsed && <span className="font-medium">{item.label}</span>}
                   </NavLink>
                 ))}
               </nav>
@@ -137,7 +166,7 @@ const DashboardLayout: React.FC = () => {
           </aside>
 
           {/* Main Content */}
-          <main className="flex-1">
+          <main className="flex-1 min-w-0">
             <Outlet />
           </main>
         </div>

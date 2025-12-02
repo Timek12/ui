@@ -1,6 +1,6 @@
 // Secret types (kept as DataType for API compatibility)
 export type DataType =
-  | "text_with_ttl"
+  | "text"
   | "kubernetes"
   | "credentials"
   | "api_key"
@@ -13,9 +13,8 @@ export interface DataCreateRequest {
   description?: string;
   data_type: string;
 
-  // Text with TTL
+  // Text
   fields?: Array<{ key: string; value: string }>;
-  ttl?: number;
 
   // Kubernetes
   namespace?: string;
@@ -60,11 +59,9 @@ export interface DataResponse {
   created_at: string;
   updated_at: string;
   is_active: boolean;
-  ttl_seconds?: number;
-  expires_at?: string;
 
   decrypted_data: {
-    // Text with TTL
+    // Text
     fields?: Array<{ key: string; value: string }>;
 
     // Kubernetes
@@ -88,6 +85,7 @@ export interface DataResponse {
   };
 
   metadata?: DataMetadata;
+  project_id?: string;
 }
 
 export interface DataUpdate {
@@ -95,9 +93,8 @@ export interface DataUpdate {
   description?: string;
   is_active?: boolean;
 
-  // Text with TTL
+  // Text
   fields?: Array<{ key: string; value: string }>;
-  ttl?: number;
 
   // Kubernetes
   namespace?: string;
@@ -120,4 +117,18 @@ export interface DataUpdate {
   // Certificate
   certificate?: string;
   chain?: string;
+  project_id?: string;
+}
+
+export interface DataListItem {
+  id: string;
+  user_id: number;
+  name: string;
+  description: string;
+  data_type: DataType;
+  version: number;
+  created_at: string;
+  updated_at: string;
+  is_active: boolean;
+  metadata?: DataMetadata;
 }

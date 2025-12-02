@@ -51,18 +51,24 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-600 to-primary-800">
-      <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow dark:border dark:border-gray-700-2xl">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900 relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-500/20 blur-[100px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/20 blur-[100px]" />
+      </div>
+
+      <div className="w-full max-w-md p-8 rounded-2xl shadow-2xl border border-white/10 bg-white/5 backdrop-blur-xl z-10 relative">
         <div className="flex flex-col items-center mb-8">
-          <div className="bg-primary-100 p-3 rounded-full mb-4">
-            <Shield className="w-12 h-12 text-primary-600" />
+          <div className="bg-gradient-to-tr from-emerald-500 to-blue-500 p-4 rounded-2xl shadow-lg mb-4 transform hover:scale-105 transition-transform duration-300">
+            <Shield className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create Account</h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-2">Join Luna today</p>
+          <h1 className="text-4xl font-bold text-white tracking-tight">Create Account</h1>
+          <p className="text-gray-400 mt-2 text-lg">Join Luna today</p>
         </div>
 
         {error && (
-          <div className="mb-4">
+          <div className="mb-6">
             <Alert
               type="error"
               message={error}
@@ -71,9 +77,9 @@ const RegisterPage: React.FC = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="name" className="label">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <label htmlFor="name" className="text-sm font-medium text-gray-300 ml-1">
               Full Name
             </label>
             <input
@@ -82,14 +88,14 @@ const RegisterPage: React.FC = () => {
               type="text"
               value={formData.name}
               onChange={handleChange}
-              className="input"
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-200"
               placeholder="John Doe"
               disabled={isLoading}
             />
           </div>
 
-          <div>
-            <label htmlFor="email" className="label">
+          <div className="space-y-2">
+            <label htmlFor="email" className="text-sm font-medium text-gray-300 ml-1">
               Email Address
             </label>
             <input
@@ -99,14 +105,14 @@ const RegisterPage: React.FC = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              className="input"
-              placeholder="user@example.com"
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-200"
+              placeholder="name@company.com"
               disabled={isLoading}
             />
           </div>
 
-          <div>
-            <label htmlFor="password" className="label">
+          <div className="space-y-2">
+            <label htmlFor="password" className="text-sm font-medium text-gray-300 ml-1">
               Password
             </label>
             <input
@@ -116,28 +122,28 @@ const RegisterPage: React.FC = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              className="input"
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-200"
               placeholder="••••••••"
               disabled={isLoading}
             />
-            <p className="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
+            <p className="text-xs text-gray-400 ml-1">Minimum 6 characters</p>
           </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className="btn-primary w-full"
+            className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/30 transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             {isLoading ? <LoadingSpinner size="sm" /> : "Create Account"}
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-gray-600 dark:text-gray-300">
+        <div className="mt-8 text-center">
+          <p className="text-gray-400">
             Already have an account?{" "}
             <Link
               to="/login"
-              className="text-primary-600 hover:text-primary-700 font-medium"
+              className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors"
             >
               Sign in
             </Link>

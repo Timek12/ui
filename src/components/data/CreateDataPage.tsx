@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCreateDataMutation } from "../../services/dataApi";
+import { useListProjectsQuery } from "../../services/projectsApi";
 import type { DataCreateRequest } from "../../types/data.types";
 import Alert from "../common/Alert";
 import { ApiKeyForm } from "./forms/ApiKeyForm";
@@ -11,7 +12,7 @@ import { SshKeyForm } from "./forms/SshKeyForm";
 import { TextDataForm } from "./forms/TextDataForm";
 
 type DataType =
-  | "text_with_ttl"
+  | "text"
   | "kubernetes"
   | "credentials"
   | "api_key"
@@ -27,9 +28,9 @@ interface DataTypeOption {
 
 const DATA_TYPES: DataTypeOption[] = [
   {
-    value: "text_with_ttl",
-    label: "Text with optional TTL",
-    description: "Key-value pairs with optional expiration",
+    value: "text",
+    label: "Text",
+    description: "Key-value pairs",
     icon: "📝",
   },
   {
@@ -66,6 +67,12 @@ const DATA_TYPES: DataTypeOption[] = [
 
 export const CreateDataPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialProjectId = searchParams.get("projectId");
+  
+  const { data: projects } = useListProjectsQuery();
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(initialProjectId || "");
+  
   const [createData] = useCreateDataMutation();
   const [selectedType, setSelectedType] = useState<DataType | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -83,8 +90,8 @@ export const CreateDataPage: React.FC = () => {
     try {
       setError(null);
       const request = mapFormDataToRequest(data);
-      await createData(request).unwrap();
-      navigate("/dashboard/data");
+      await createData({ ...request, projectId: selectedProjectId || undefined }).unwrap();
+      navigate(selectedProjectId ? `/dashboard/data?projectId=${selectedProjectId}` : "/dashboard/data");
     } catch (err: any) {
       console.error("Failed to create data", err);
       setError(
@@ -98,12 +105,12 @@ export const CreateDataPage: React.FC = () => {
       setSelectedType(null);
       setError(null);
     } else {
-      navigate("/dashboard/data");
+      navigate(selectedProjectId ? `/dashboard/data?projectId=${selectedProjectId}` : "/dashboard/data");
     }
   };
 
   const mapFormDataToRequest = (formData: any): DataCreateRequest => {
-    const { type, name, description, ttl, ...rest } = formData;
+    const { type, name, description, ...rest } = formData;
 
     const normalizeOptional = (value?: string) =>
       typeof value === "string" && value.trim() ? value : undefined;
@@ -117,11 +124,8 @@ export const CreateDataPage: React.FC = () => {
     };
 
     switch (type as DataType) {
-      case "text_with_ttl": {
+      case "text": {
         request.fields = rest.fields ?? [];
-        if (typeof ttl === "number" && ttl > 0) {
-          request.ttl = ttl;
-        }
         break;
       }
       case "kubernetes": {
@@ -172,7 +176,7 @@ export const CreateDataPage: React.FC = () => {
 
   const renderForm = () => {
     switch (selectedType) {
-      case "text_with_ttl":
+      case "text":
         return <TextDataForm onSubmit={handleSubmit} onCancel={handleCancel} />;
       case "kubernetes":
         return (
@@ -211,6 +215,24 @@ export const CreateDataPage: React.FC = () => {
             />
           </div>
         )}
+
+        <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Assign to Project
+            </label>
+            <select
+                value={selectedProjectId}
+                onChange={(e) => setSelectedProjectId(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            >
+                <option value="">Personal</option>
+                {projects?.map((project) => (
+                    <option key={project.id} value={project.id}>
+                        {project.name}
+                    </option>
+                ))}
+            </select>
+        </div>
 
         {!selectedType ? (
           <div>

@@ -12,6 +12,7 @@ import { CreateDataPage } from "../components/data/CreateDataPage";
 import DataPage from "../components/data/DataPage";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import VaultPage from "../components/vault/VaultPage";
+import Projects from "../pages/Projects";
 
 export const AppRouter = () => {
   return (
@@ -30,6 +31,7 @@ export const AppRouter = () => {
       >
         <Route index element={<DashboardHome />} />
         <Route path="data" element={<DataPage />} />
+        <Route path="projects" element={<Projects />} />
         <Route path="create-data" element={<CreateDataPage />} />
         <Route
           path="all-data"

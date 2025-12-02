@@ -9,7 +9,6 @@ interface TextDataFormProps {
     name?: string;
     description?: string;
     fields?: Array<{ key: string; value: string }>;
-    ttl?: number;
   };
 }
 
@@ -28,12 +27,6 @@ export const TextDataForm: React.FC<TextDataFormProps> = ({
       ? initialData.fields
       : [{ key: "", value: "" }]
   );
-  const [ttl, setTtl] = useState<string>(
-    initialData?.ttl !== undefined && initialData?.ttl !== null
-      ? String(initialData.ttl / 3600)
-      : ""
-  );
-  const [ttlUnit, setTtlUnit] = useState<"minutes" | "hours" | "days">("hours");
 
   const addField = () => {
     setFields([...fields, { key: "", value: "" }]);
@@ -59,17 +52,11 @@ export const TextDataForm: React.FC<TextDataFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const ttlSeconds = ttl
-      ? parseInt(ttl) *
-        (ttlUnit === "minutes" ? 60 : ttlUnit === "hours" ? 3600 : 86400)
-      : undefined;
-
     onSubmit({
-      type: "text_with_ttl",
+      type: "text",
       name,
       description,
       fields: fields.filter((f) => f.key && f.value),
-      ttl: ttlSeconds,
     });
   };
 
@@ -148,38 +135,6 @@ export const TextDataForm: React.FC<TextDataFormProps> = ({
             </div>
           ))}
         </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Time To Live (Optional)
-        </label>
-        <div className="flex gap-2">
-          <input
-            type="number"
-            value={ttl}
-            onChange={(e) => setTtl(e.target.value)}
-            min="1"
-            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            placeholder="Enter duration"
-          />
-          <select
-            value={ttlUnit}
-            onChange={(e) =>
-              setTtlUnit(e.target.value as "minutes" | "hours" | "days")
-            }
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          >
-            <option value="minutes">Minutes</option>
-            <option value="hours">Hours</option>
-            <option value="days">Days</option>
-          </select>
-        </div>
-        {ttl && (
-          <p className="mt-1 text-sm text-gray-500">
-            Data will expire in {ttl} {ttlUnit}
-          </p>
-        )}
       </div>
 
       <div className="flex gap-3 pt-4">

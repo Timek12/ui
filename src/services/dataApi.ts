@@ -1,5 +1,6 @@
 import type {
   DataCreateRequest,
+  DataListItem,
   DataResponse,
   DataUpdate,
 } from "../types/data.types";
@@ -8,8 +9,22 @@ import { api } from "./api";
 export const dataApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // Get all user data
-    getData: builder.query<DataResponse[], void>({
-      query: () => "/api/data",
+    getData: builder.query<DataListItem[], { type?: string; projectId?: string } | void>({
+      query: (arg) => {
+        const params: Record<string, string> = {};
+        if (arg?.type) params.data_type = arg.type;
+        
+        if (arg?.projectId) {
+            return {
+                url: `/api/data/project/${arg.projectId}`,
+                params
+            };
+        }
+        return {
+            url: "/api/data",
+            params
+        };
+      },
       providesTags: (result) =>
         result
           ? [
@@ -20,18 +35,28 @@ export const dataApi = api.injectEndpoints({
     }),
 
     // Get data by ID
-    getDataById: builder.query<DataResponse, string>({
-      query: (id) => `/api/data/${id}`,
-      providesTags: (_result, _error, id) => [{ type: "Data", id }],
+    getDataById: builder.query<DataResponse, { id: string; projectId?: string }>({
+      query: ({ id, projectId }) => {
+          if (projectId) {
+              return `/api/data/project/${projectId}/${id}`;
+          }
+          return `/api/data/${id}`;
+      },
+      providesTags: (_result, _error, { id }) => [{ type: "Data", id }],
     }),
 
     // Create new data
-    createData: builder.mutation<DataResponse, DataCreateRequest>({
-      query: (data) => ({
-        url: "/api/data",
-        method: "POST",
-        body: data,
-      }),
+    createData: builder.mutation<DataResponse, DataCreateRequest & { projectId?: string }>({
+      query: ({ projectId, ...data }) => {
+        const params: Record<string, string> = {};
+        if (projectId) params.project_id = projectId;
+        return {
+            url: "/api/data",
+            method: "POST",
+            body: data,
+            params
+        };
+      },
       invalidatesTags: [{ type: "Data", id: "LIST" }],
     }),
 

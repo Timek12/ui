@@ -257,7 +257,6 @@ const VaultPage: React.FC = () => {
             <li>• This is a one-time operation</li>
             <li>• Store your external token safely - you cannot recover it</li>
             <li>• The external token is required to unseal the vault</li>
-            <li>• Use a strong, random token (minimum 8 characters)</li>
           </ul>
         </div>
 
@@ -272,13 +271,13 @@ const VaultPage: React.FC = () => {
               value={externalToken}
               onChange={(e) => setExternalToken(e.target.value)}
               required
-              minLength={8}
+              minLength={32}
               className="input font-mono"
               placeholder="Enter a strong external token"
               disabled={isProcessing}
             />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Minimum 8 characters
+              Minimum 32 characters
             </p>
           </div>
 

@@ -1,26 +1,31 @@
 import {
-  Box,
-  Check,
-  Copy,
-  Cpu,
-  Edit2,
-  FileText,
-  Key,
-  Plus,
-  Shield,
-  Terminal,
-  Trash2,
-  UserCircle,
+    Box,
+    Check,
+    Copy,
+    Cpu,
+    Edit2,
+    FileText,
+    Folder,
+    Key,
+    Plus,
+    Shield,
+    Terminal,
+    Trash2,
+    UserCircle
 } from "lucide-react";
+
+import { skipToken } from "@reduxjs/toolkit/query/react";
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
-  useDeleteDataMutation,
-  useGetDataByIdQuery,
-  useGetDataQuery,
-  useUpdateDataMutation,
+    useDeleteDataMutation,
+    useGetDataByIdQuery,
+    useGetDataQuery,
+    useUpdateDataMutation,
 } from "../../services/dataApi";
-import type { DataResponse, DataUpdate } from "../../types/data.types";
+import { useListProjectsQuery } from "../../services/projectsApi";
+import type { DataListItem, DataUpdate } from "../../types/data.types";
 import Alert from "../common/Alert";
 import LoadingSpinner from "../common/LoadingSpinner";
 import Modal from "../common/Modal";
@@ -39,7 +44,7 @@ const TYPE_BADGES: Record<
     className: string;
   }
 > = {
-  text_with_ttl: {
+  text: {
     label: "Text",
     Icon: FileText,
     className: "bg-blue-100 text-blue-800 border-blue-200",
@@ -57,7 +62,7 @@ const TYPE_BADGES: Record<
   api_key: {
     label: "API Key",
     Icon: Cpu,
-    className: "bg-purple-100 text-purple-800 border-purple-200",
+    className: "bg-emerald-100 text-emerald-800 border-emerald-200",
   },
   ssh_key: {
     label: "SSH Key",
@@ -71,79 +76,77 @@ const TYPE_BADGES: Record<
   },
 };
 
-const getTypeBadge = (type: string) => {
-  const badge = TYPE_BADGES[type] || {
-    label: type,
-    Icon: Key,
-    className: "bg-gray-100 text-gray-800 border-gray-200",
-  };
-
-  const { Icon, label, className } = badge;
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium border ${className}`}
-    >
-      <Icon className="w-4 h-4" />
-      {label}
-    </span>
-  );
-};
-
 const DataPage: React.FC = () => {
-  const { data: dataList, isLoading, error: fetchError } = useGetDataQuery();
+  const navigate = useNavigate();
+  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingData, setEditingData] = useState<DataListItem | null>(null);
+  const [editingDataId, setEditingDataId] = useState<string | null>(null);
+  const [editProjectId, setEditProjectId] = useState<string>("");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const { user } = useSelector((state: any) => state.auth);
+  const { data: projects } = useListProjectsQuery();
+  
+  const { data: dataList, isLoading, error: fetchError } = useGetDataQuery(
+    selectedProjectId ? { projectId: selectedProjectId } : undefined,
+    { refetchOnMountOrArgChange: true }
+  );
+
   const [updateData] = useUpdateDataMutation();
   const [deleteData] = useDeleteDataMutation();
+  
+  const { data: fullData, isLoading: isLoadingFullData } = useGetDataByIdQuery(
+    editingDataId ? { id: editingDataId, projectId: selectedProjectId || undefined } : skipToken,
+    { skip: !editingDataId }
+  );
 
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingData, setEditingData] = useState<DataResponse | null>(null);
-  const [editingDataId, setEditingDataId] = useState<string | null>(null);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const {
-    data: fullData,
-    error: fetchFullDataError,
-    isLoading: isLoadingFullData,
-  } = useGetDataByIdQuery(editingDataId || "", {
-    skip: !editingDataId,
-  });
-
-  const navigate = useNavigate();
-
-  React.useEffect(() => {
-    if (fetchFullDataError) {
-      setError(
-        (fetchFullDataError as any)?.data?.detail ||
-          "Failed to load secret data"
-      );
-      setIsEditModalOpen(false);
-      setEditingDataId(null);
-    }
-    if (fullData) {
-      setEditingData(fullData);
-      setIsEditModalOpen(true);
-    }
-  }, [fullData, fetchFullDataError]);
-
-  const handleDeleteData = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
-
-    try {
-      await deleteData(id).unwrap();
-      setSuccess("Secret deleted successfully!");
-    } catch (err: any) {
-      setError(err?.data?.detail || "Failed to delete secret");
-    }
+  const getTypeBadge = (type: string) => {
+    const badge = TYPE_BADGES[type] || {
+      label: type,
+      Icon: FileText,
+      className: "bg-gray-100 text-gray-800 border-gray-200",
+    };
+    const { Icon, label, className } = badge;
+    return (
+      <span
+        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border ${className}`}
+      >
+        <Icon className="w-3.5 h-3.5" />
+        {label}
+      </span>
+    );
   };
 
-  const handleEditData = (data: DataResponse) => {
+  const handleEditData = (data: DataListItem) => {
+    setEditingData(data);
     setEditingDataId(data.id);
+    setEditProjectId(selectedProjectId); 
+    setIsEditModalOpen(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditModalOpen(false);
+    setEditingData(null);
+    setEditingDataId(null);
+    setError(null);
+  };
+
+  const handleDeleteData = async (id: string, name: string) => {
+    if (window.confirm(`Are you sure you want to delete secret "${name}"?`)) {
+      try {
+        await deleteData(id).unwrap();
+        setSuccess(`Secret "${name}" deleted successfully`);
+      } catch (err: any) {
+        setError(err?.data?.detail || "Failed to delete secret");
+      }
+    }
   };
 
   const handleUpdateSubmit = async (formData: any) => {
-    if (!editingData) return;
+    if (!editingData || !editingDataId) return;
 
     setError(null);
     setSuccess(null);
@@ -152,14 +155,12 @@ const DataPage: React.FC = () => {
       const updatePayload: DataUpdate = {
         name: formData.name,
         description: formData.description,
+        project_id: editProjectId || undefined,
       };
 
       switch (editingData.data_type) {
-        case "text_with_ttl":
+        case "text":
           updatePayload.fields = formData.fields;
-          if (formData.ttl) {
-            updatePayload.ttl = formData.ttl;
-          }
           break;
         case "kubernetes":
           updatePayload.namespace = formData.namespace;
@@ -189,7 +190,7 @@ const DataPage: React.FC = () => {
       }
 
       await updateData({
-        id: editingData.id,
+        id: editingDataId,
         data: updatePayload,
       }).unwrap();
 
@@ -202,17 +203,11 @@ const DataPage: React.FC = () => {
     }
   };
 
-  const handleCancelEdit = () => {
-    setIsEditModalOpen(false);
-    setEditingData(null);
-    setEditingDataId(null);
-  };
-
   const renderEditForm = () => {
-    if (!editingData) return null;
+    if (!editingData || !fullData) return null;
 
-    const decrypted = (editingData as any).decrypted_data || {};
-    const metadata = (editingData as any).metadata || {};
+    const decrypted = fullData.decrypted_data || {};
+    const metadata = fullData.metadata || {};
 
     const initialData = {
       type: editingData.data_type,
@@ -220,28 +215,31 @@ const DataPage: React.FC = () => {
       description: editingData.description,
     };
 
+    const formProps = {
+        key: editingData.id,
+        onSubmit: handleUpdateSubmit,
+        onCancel: handleCancelEdit,
+        isEditing: true,
+    };
+
+    let formContent = null;
+
     switch (editingData.data_type) {
-      case "text_with_ttl":
-        return (
+      case "text":
+        formContent = (
           <TextDataForm
-            key={editingData.id}
-            onSubmit={handleUpdateSubmit}
-            onCancel={handleCancelEdit}
-            isEditing={true}
+            {...formProps}
             initialData={{
               ...initialData,
               fields: decrypted.fields || [],
-              ttl: editingData.ttl_seconds,
             }}
           />
         );
+        break;
       case "kubernetes":
-        return (
+        formContent = (
           <KubernetesForm
-            key={editingData.id}
-            onSubmit={handleUpdateSubmit}
-            onCancel={handleCancelEdit}
-            isEditing={true}
+            {...formProps}
             initialData={{
               ...initialData,
               namespace: metadata.namespace || "",
@@ -249,13 +247,11 @@ const DataPage: React.FC = () => {
             }}
           />
         );
+        break;
       case "credentials":
-        return (
+        formContent = (
           <CredentialsForm
-            key={editingData.id}
-            onSubmit={handleUpdateSubmit}
-            onCancel={handleCancelEdit}
-            isEditing={true}
+            {...formProps}
             initialData={{
               ...initialData,
               username: metadata.username || "",
@@ -264,26 +260,22 @@ const DataPage: React.FC = () => {
             }}
           />
         );
+        break;
       case "api_key":
-        return (
+        formContent = (
           <ApiKeyForm
-            key={editingData.id}
-            onSubmit={handleUpdateSubmit}
-            onCancel={handleCancelEdit}
-            isEditing={true}
+            {...formProps}
             initialData={{
               ...initialData,
               apiKey: decrypted.apiKey || "",
             }}
           />
         );
+        break;
       case "ssh_key":
-        return (
+        formContent = (
           <SshKeyForm
-            key={editingData.id}
-            onSubmit={handleUpdateSubmit}
-            onCancel={handleCancelEdit}
-            isEditing={true}
+            {...formProps}
             initialData={{
               ...initialData,
               privateKey: decrypted.privateKey || "",
@@ -294,13 +286,11 @@ const DataPage: React.FC = () => {
             }}
           />
         );
+        break;
       case "certificate":
-        return (
+        formContent = (
           <CertificateForm
-            key={editingData.id}
-            onSubmit={handleUpdateSubmit}
-            onCancel={handleCancelEdit}
-            isEditing={true}
+            {...formProps}
             initialData={{
               ...initialData,
               certificate: decrypted.certificate || "",
@@ -310,9 +300,40 @@ const DataPage: React.FC = () => {
             }}
           />
         );
+        break;
       default:
         return null;
     }
+
+    return (
+        <div className="space-y-6">
+             {/* Project Assignment */}
+             <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
+               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                 Project Assignment
+               </label>
+               <select
+                 value={editProjectId}
+                 onChange={(e) => setEditProjectId(e.target.value)}
+                 disabled={!fullData || !user || String(user.user_id) !== String(fullData.user_id)}
+                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+               >
+                 <option value="">Personal</option>
+                 {projects?.map((project) => (
+                   <option key={project.id} value={project.id}>
+                     {project.name}
+                   </option>
+                 ))}
+               </select>
+               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                 {user && fullData && String(user.user_id) === String(fullData.user_id)
+                   ? "You can change the project assignment as the owner."
+                   : "Only the owner can change the project assignment."}
+               </p>
+             </div>
+            {formContent}
+        </div>
+    );
   };
 
   const copyToClipboard = async (text: string, id: string) => {
@@ -337,16 +358,33 @@ const DataPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Secrets</h1>
-          <p className="text-gray-600 mt-2">Manage your encrypted secrets</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Secrets</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">Manage your encrypted secrets</p>
         </div>
-        <button
-          onClick={() => navigate("/dashboard/create-data")}
-          className="btn-primary flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          New Secret
-        </button>
+        <div className="flex items-center gap-4">
+            <div className="relative">
+                <select
+                    value={selectedProjectId}
+                    onChange={(e) => setSelectedProjectId(e.target.value)}
+                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white appearance-none"
+                >
+                    <option value="">Personal Secrets</option>
+                    {projects?.map((project) => (
+                        <option key={project.id} value={project.id}>
+                            {project.name}
+                        </option>
+                    ))}
+                </select>
+                <Folder className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
+            </div>
+            <button
+            onClick={() => navigate(selectedProjectId ? `/dashboard/create-data?projectId=${selectedProjectId}` : "/dashboard/create-data")}
+            className="btn-primary flex items-center gap-2"
+            >
+            <Plus className="w-5 h-5" />
+            New Secret
+            </button>
+        </div>
       </div>
 
       {success && (

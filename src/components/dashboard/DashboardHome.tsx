@@ -1,31 +1,46 @@
-import { Activity, Key, Lock } from "lucide-react";
+import { Activity, Clock, Folder, Key, Lock, Plus, Shield, Users } from "lucide-react";
 import React from "react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useGetLogsQuery } from "../../services/auditApi";
 import { useGetDataQuery } from "../../services/dataApi";
+import { useListProjectsQuery } from "../../services/projectsApi";
 import { useGetVaultStatusQuery } from "../../services/vaultApi";
 import { RootState } from "../../store";
 import LoadingSpinner from "../common/LoadingSpinner";
 
 const DashboardHome: React.FC = () => {
+  const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
   const isAdmin = user?.role === "admin";
 
-  const { data: vaultStatus, isLoading: vaultLoading } =
-    useGetVaultStatusQuery();
-  const { data: dataItems, isLoading: dataLoading } = useGetDataQuery(
-    undefined,
-    {
-      refetchOnMountOrArgChange: true,
-    }
-  );
+  const { data: vaultStatus, isLoading: vaultLoading } = useGetVaultStatusQuery(undefined, { skip: !isAdmin });
+  const { data: dataItems, isLoading: dataLoading } = useGetDataQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
+  const { data: projects, isLoading: projectsLoading } = useListProjectsQuery();
+  const { data: auditData, isLoading: auditLoading } = useGetLogsQuery({ limit: 5, offset: 0 });
 
   const stats = [
     {
       title: "Total Secrets",
       value: dataItems?.length || 0,
       icon: Key,
-      color: "bg-blue-500",
+      color: "from-blue-500 to-blue-600",
+      link: "/dashboard/data",
+    },
+    {
+      title: "Total Projects",
+      value: projects?.length || 0,
+      icon: Folder,
+      color: "from-emerald-500 to-emerald-600",
+      link: "/dashboard/projects",
+    },
+    {
+      title: "Active Secrets",
+      value: dataItems?.filter((s) => s.is_active).length || 0,
+      icon: Activity,
+      color: "from-green-500 to-green-600",
       link: "/dashboard/data",
     },
     ...(isAdmin
@@ -34,21 +49,14 @@ const DashboardHome: React.FC = () => {
             title: "Vault Status",
             value: vaultStatus?.vault.sealed ? "Sealed" : "Unsealed",
             icon: Lock,
-            color: vaultStatus?.vault.sealed ? "bg-red-500" : "bg-green-500",
+            color: vaultStatus?.vault.sealed ? "from-red-500 to-red-600" : "from-emerald-500 to-emerald-600",
             link: "/dashboard/vault",
           },
         ]
       : []),
-    {
-      title: "Active Secrets",
-      value: dataItems?.filter((s) => s.is_active).length || 0,
-      icon: Activity,
-      color: "bg-purple-500",
-      link: "/dashboard/data",
-    },
   ];
 
-  if (vaultLoading || dataLoading) {
+  if (vaultLoading || dataLoading || projectsLoading || auditLoading) {
     return (
       <div className="flex justify-center items-center h-96">
         <LoadingSpinner size="lg" message="Loading dashboard..." />
@@ -57,34 +65,47 @@ const DashboardHome: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Dashboard
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300 mt-2">
-          Welcome to Luna Data Management
-        </p>
+    <div className="space-y-8">
+      <div className="flex justify-between items-end">
+        <div>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
+            Dashboard
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-2 text-lg">
+            Welcome back, {user?.name || user?.email}
+          </p>
+        </div>
+        <div className="flex gap-3">
+            <button 
+                onClick={() => navigate('/dashboard/create-data')}
+                className="btn-primary flex items-center gap-2"
+            >
+                <Plus className="w-4 h-4" />
+                New Secret
+            </button>
+        </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
           <Link
             key={stat.title}
             to={stat.link}
-            className="card hover:shadow-lg transition-shadow"
+            className="card group hover:scale-[1.02] transition-transform duration-200 cursor-pointer relative overflow-hidden"
           >
-            <div className="flex items-center justify-between">
+            <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${stat.color} opacity-10 rounded-bl-full -mr-4 -mt-4 transition-opacity group-hover:opacity-20`} />
+            
+            <div className="flex items-start justify-between relative z-10">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
                   {stat.title}
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
                   {stat.value}
                 </p>
               </div>
-              <div className={`${stat.color} p-3 rounded-full`}>
+              <div className={`bg-gradient-to-br ${stat.color} p-3 rounded-xl shadow-lg`}>
                 <stat.icon className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -92,101 +113,111 @@ const DashboardHome: React.FC = () => {
         ))}
       </div>
 
-      {/* Vault Status Card - Admin Only */}
-      {isAdmin && vaultStatus && (
-        <div className="card">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Vault Information
-            </h2>
-            <Link
-              to="/dashboard/vault"
-              className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
-            >
-              Manage Vault →
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 dark:text-gray-400">Status</p>
-              <p className="text-lg font-semibold text-gray-900 dark:text-white mt-1">
-                {vaultStatus?.vault.initialized
-                  ? "Initialized"
-                  : "Not Initialized"}
-              </p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Recent Activity */}
+        <div className="lg:col-span-2 space-y-6">
+            <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-primary-500" />
+                    Recent Activity
+                </h2>
+                <Link to="/dashboard/audit" className="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                    View All
+                </Link>
             </div>
-
-            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 dark:text-gray-400">State</p>
-              <p className="text-lg font-semibold text-gray-900 dark:text-white mt-1">
-                {vaultStatus?.vault.sealed ? "Sealed" : "Unsealed"}
-              </p>
-            </div>
-
-            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Version
-              </p>
-              <p className="text-lg font-semibold text-gray-900 dark:text-white mt-1">
-                {vaultStatus?.vault.version || "N/A"}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Recent Data */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Recent Secrets
-          </h2>
-          <Link
-            to="/dashboard/data"
-            className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-          >
-            View All →
-          </Link>
-        </div>
-
-        {dataItems && dataItems.length > 0 ? (
-          <div className="space-y-3">
-            {dataItems.slice(0, 5).map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
-              >
-                <div className="flex items-center gap-3">
-                  <Key className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      {item.name}
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {item.description || "No description"}
-                    </p>
-                  </div>
+            
+            <div className="card">
+                <div className="space-y-4">
+                    {auditData?.logs && auditData.logs.length > 0 ? (
+                        auditData.logs.map((log) => (
+                            <div key={log.id} className="flex items-center justify-between p-4 bg-gray-50/50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
+                                <div className="flex items-center gap-4">
+                                    <div className={`p-2 rounded-lg ${
+                                        log.status === 'success' 
+                                            ? 'bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400' 
+                                            : 'bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400'
+                                    }`}>
+                                        <Activity className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <p className="font-medium text-gray-900 dark:text-white">
+                                            {log.action}
+                                        </p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                            by {log.user_id ? log.user_id.slice(0, 8) : 'System'} • {log.resource_type}
+                                        </p>
+                                    </div>
+                                </div>
+                                <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
+                                    {new Date(log.created_at).toLocaleString()}
+                                </span>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                            No recent activity found
+                        </div>
+                    )}
                 </div>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Updated{" "}
-                  {new Date(item.updated_at).toLocaleDateString("en-GB")}
-                </span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <Key className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No secrets yet</p>
-            <Link
-              to="/dashboard/create-data"
-              className="text-primary-600 hover:text-primary-700 text-sm font-medium mt-2 inline-block"
-            >
-              Create your first secret
-            </Link>
-          </div>
-        )}
+            </div>
+        </div>
+
+        {/* Quick Actions & Info */}
+        <div className="space-y-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Shield className="w-5 h-5 text-primary-500" />
+                Quick Actions
+            </h2>
+            
+            <div className="grid gap-4">
+                <button 
+                    onClick={() => navigate('/dashboard/create-data')}
+                    className="card hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors text-left group"
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-xl text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
+                            <Key className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-gray-900 dark:text-white">Add New Secret</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Store a new secure credential</p>
+                        </div>
+                    </div>
+                </button>
+
+                <button 
+                    onClick={() => navigate('/dashboard/projects')}
+                    className="card hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors text-left group"
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="bg-emerald-100 dark:bg-emerald-900/30 p-3 rounded-xl text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
+                            <Folder className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-gray-900 dark:text-white">Create Project</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Organize secrets into groups</p>
+                        </div>
+                    </div>
+                </button>
+
+                {isAdmin && (
+                    <button 
+                        onClick={() => navigate('/dashboard/users')}
+                        className="card hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors text-left group"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="bg-orange-100 dark:bg-orange-900/30 p-3 rounded-xl text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform">
+                                <Users className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Manage Users</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Administer system access</p>
+                            </div>
+                        </div>
+                    </button>
+                )}
+            </div>
+        </div>
       </div>
     </div>
   );

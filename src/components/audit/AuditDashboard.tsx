@@ -18,8 +18,10 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'
 
 const AuditDashboard: React.FC = () => {
   const [page, setPage] = useState(0);
+  const [tablePage, setTablePage] = useState(0);
   const [autoRefreshInterval, setAutoRefreshInterval] = useState<number>(0); // 0 = off
-  const limit = 100; // Fetch more for better stats
+  const limit = 100; // Fetch for stats
+  const logsPerTablePage = 10; // Display per page
   
   const { data, isLoading, error, refetch } = useGetLogsQuery({ 
     limit, 
@@ -46,12 +48,41 @@ const AuditDashboard: React.FC = () => {
     const success = logs.filter(l => l.status === 'success').length;
     const failure = total - success;
     
-    // Action Distribution
+    // Categorize Actions
+    const authActions = ['login', 'logout', 'register', 'token_refresh', 'password_reset'];
+    const dataActions = ['create_data', 'update_data', 'delete_data', 'get_data', 'list_data'];
+    const projectActions = ['create_project', 'update_project', 'delete_project', 'add_member', 'remove_member', 'list_projects'];
+    
     const actionCounts: Record<string, number> = {};
+    const authCounts: Record<string, number> = {};
+    const dataCounts: Record<string, number> = {};
+    const projectCounts: Record<string, number> = {};
+    const adminCounts: Record<string, number> = {};
+    
     logs.forEach((l: any) => {
       actionCounts[l.action] = (actionCounts[l.action] || 0) + 1;
+      
+      if (authActions.includes(l.action)) {
+        authCounts[l.action] = (authCounts[l.action] || 0) + 1;
+      } else if (dataActions.includes(l.action)) {
+        dataCounts[l.action] = (dataCounts[l.action] || 0) + 1;
+      } else if (projectActions.includes(l.action)) {
+        projectCounts[l.action] = (projectCounts[l.action] || 0) + 1;
+      } else {
+        adminCounts[l.action] = (adminCounts[l.action] || 0) + 1;
+      }
     });
-    const actionData = Object.entries(actionCounts)
+    
+    const authData = Object.entries(authCounts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+    const dataData = Object.entries(dataCounts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+    const projectData = Object.entries(projectCounts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+    const adminData = Object.entries(adminCounts)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
 
@@ -104,7 +135,7 @@ const AuditDashboard: React.FC = () => {
       .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       .slice(0, 5);
 
-    return { total, success, failure, actionData, timelineData, userData, resourceData, ipData, recentFailures };
+    return { total, success, failure, authData, dataData, projectData, adminData, timelineData, userData, resourceData, ipData, recentFailures };
   }, [data]);
 
   if (isLoading) return <div className="p-4">Loading audit logs...</div>;
@@ -113,7 +144,7 @@ const AuditDashboard: React.FC = () => {
   const logs = data?.logs || [];
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
             <h1 className="text-2xl font-bold">{user?.role === 'admin' ? 'Audit Dashboard' : 'My Activity'}</h1>
@@ -125,7 +156,7 @@ const AuditDashboard: React.FC = () => {
             <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-600">Auto-refresh:</span>
                 <select 
-                    className="border rounded p-1 text-sm"
+                    className="border rounded p-1 text-sm bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     value={autoRefreshInterval}
                     onChange={(e) => setAutoRefreshInterval(Number(e.target.value))}
                 >
@@ -151,94 +182,132 @@ const AuditDashboard: React.FC = () => {
       {/* Summary Cards */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white p-4 rounded-lg shadow border-l-4 border-blue-500">
-            <h3 className="text-gray-500 text-sm">Total Events</h3>
-            <p className="text-2xl font-bold">{stats.total}</p>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border-l-4 border-blue-500">
+            <h3 className="text-gray-500 dark:text-gray-400 text-sm">Total Events</h3>
+            <p className="text-2xl font-bold dark:text-white">{stats.total}</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow border-l-4 border-green-500">
-            <h3 className="text-gray-500 text-sm">Success Rate</h3>
-            <p className="text-2xl font-bold">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border-l-4 border-green-500">
+            <h3 className="text-gray-500 dark:text-gray-400 text-sm">Success Rate</h3>
+            <p className="text-2xl font-bold dark:text-white">
               {stats.total > 0 ? Math.round((stats.success / stats.total) * 100) : 0}%
             </p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow border-l-4 border-red-500">
-            <h3 className="text-gray-500 text-sm">Failures</h3>
-            <p className="text-2xl font-bold">{stats.failure}</p>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border-l-4 border-red-500">
+            <h3 className="text-gray-500 dark:text-gray-400 text-sm">Failures</h3>
+            <p className="text-2xl font-bold dark:text-white">{stats.failure}</p>
           </div>
         </div>
       )}
 
-      {/* Charts Row 1 */}
+      {/* Charts Row 1 - 3 charts */}
       {stats && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Activity Timeline */}
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">Activity Timeline (Hourly)</h3>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">Activity Timeline (Hourly)</h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.timelineData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis dataKey="name" stroke="#9CA3AF" />
+                  <YAxis stroke="#9CA3AF" />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F3F4F6' }}
+                    itemStyle={{ color: '#F3F4F6' }}
+                  />
                   <Bar dataKey="value" fill="#8884d8" name="Events" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          {/* Action Distribution */}
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">Action Distribution</h3>
+          {/* Authentication Actions */}
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">Authentication Actions</h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={stats.actionData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {stats.actionData.map((_entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
+                <BarChart data={stats.authData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis dataKey="name" stroke="#9CA3AF" angle={-45} textAnchor="end" height={80} />
+                  <YAxis stroke="#9CA3AF" />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F3F4F6' }}
+                    itemStyle={{ color: '#F3F4F6' }}
+                  />
+                  <Bar dataKey="value" fill="#0088FE" name="Count" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Data Operations */}
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">Data Operations</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.dataData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis dataKey="name" stroke="#9CA3AF" angle={-45} textAnchor="end" height={80} />
+                  <YAxis stroke="#9CA3AF" />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F3F4F6' }}
+                    itemStyle={{ color: '#F3F4F6' }}
+                  />
+                  <Bar dataKey="value" fill="#00C49F" name="Count" />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
         </div>
       )}
 
-      {/* Charts Row 2 */}
+      {/* Charts Row 2 - 2 charts */}
       {stats && (
-        <div className={`grid grid-cols-1 ${user?.role === 'admin' ? 'lg:grid-cols-3' : 'lg:grid-cols-1'} gap-6`}>
-          {/* Top Users - Admin Only */}
-          {user?.role === 'admin' && (
-            <div className="bg-white p-4 rounded-lg shadow">
-              <h3 className="text-lg font-semibold mb-4">Top Users</h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats.userData} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
-                    <YAxis dataKey="name" type="category" width={80} />
-                    <Tooltip />
-                    <Bar dataKey="value" fill="#82ca9d" name="Events" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">Project Management</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.projectData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis dataKey="name" stroke="#9CA3AF" angle={-45} textAnchor="end" height={80} />
+                  <YAxis stroke="#9CA3AF" />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F3F4F6' }}
+                    itemStyle={{ color: '#F3F4F6' }}
+                  />
+                  <Bar dataKey="value" fill="#FFBB28" name="Count" />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-          )}
+          </div>
 
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">Administrative Actions</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.adminData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis dataKey="name" stroke="#9CA3AF" angle={-45} textAnchor="end" height={80} style={{ fontSize: 11 }} />
+                  <YAxis stroke="#9CA3AF" />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F3F4F6' }}
+                    itemStyle={{ color: '#F3F4F6' }}
+                  />
+                  <Bar dataKey="value" fill="#FF8042" name="Count" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Charts Row 3 - 3 charts */}
+      {stats && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Resource Distribution */}
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">Resource Types</h3>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">Resource Types</h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -261,23 +330,44 @@ const AuditDashboard: React.FC = () => {
             </div>
           </div>
 
+          {/* Top Users - Admin Only */}
+          {user?.role === 'admin' && (
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold mb-4 dark:text-white">Top Users</h3>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={stats.userData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <XAxis type="number" stroke="#9CA3AF" />
+                    <YAxis dataKey="name" type="category" width={80} stroke="#9CA3AF" />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F3F4F6' }}
+                      itemStyle={{ color: '#F3F4F6' }}
+                    />
+                    <Bar dataKey="value" fill="#82ca9d" name="Events" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+
           {/* Top IPs - Admin Only */}
           {user?.role === 'admin' && (
-            <div className="bg-white p-4 rounded-lg shadow">
-              <h3 className="text-lg font-semibold mb-4">Top IPs</h3>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold mb-4 dark:text-white">Top IPs</h3>
               <div className="h-64 overflow-auto">
                 <table className="min-w-full text-sm">
                   <thead>
-                    <tr className="bg-gray-50">
-                      <th className="px-4 py-2 text-left">IP</th>
-                      <th className="px-4 py-2 text-right">Count</th>
+                    <tr className="bg-gray-50 dark:bg-gray-700">
+                      <th className="px-4 py-2 text-left dark:text-gray-300">IP</th>
+                      <th className="px-4 py-2 text-right dark:text-gray-300">Count</th>
                     </tr>
                   </thead>
                   <tbody>
                     {stats.ipData.map((ip, idx) => (
-                      <tr key={idx} className="border-b">
-                        <td className="px-4 py-2">{ip.name}</td>
-                        <td className="px-4 py-2 text-right font-medium">{ip.value}</td>
+                      <tr key={idx} className="border-b dark:border-gray-700">
+                        <td className="px-4 py-2 dark:text-gray-300">{ip.name}</td>
+                        <td className="px-4 py-2 text-right font-medium dark:text-gray-300">{ip.value}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -290,17 +380,17 @@ const AuditDashboard: React.FC = () => {
 
       {/* Recent Failures */}
       {stats && stats.recentFailures.length > 0 && (
-        <div className="bg-red-50 p-4 rounded-lg shadow border border-red-200">
-          <h3 className="text-lg font-semibold text-red-800 mb-2">Recent Failures</h3>
+        <div className="bg-red-50 dark:bg-red-900/10 p-4 rounded-lg shadow border border-red-200 dark:border-red-900/30">
+          <h3 className="text-lg font-semibold text-red-800 dark:text-red-400 mb-2">Recent Failures</h3>
           <div className="space-y-2">
             {stats.recentFailures.map((log: any) => (
-              <div key={log.id} className="flex justify-between items-center bg-white p-2 rounded border border-red-100">
+              <div key={log.id} className="flex justify-between items-center bg-white dark:bg-gray-800 p-2 rounded border border-red-100 dark:border-red-900/20">
                 <div>
-                  <span className="font-medium text-red-600">{log.action}</span>
-                  <span className="text-gray-500 text-sm ml-2">by {log.user_id ? log.user_id.slice(0, 8) : 'System'}</span>
-                  <p className="text-xs text-gray-600">{log.details}</p>
+                  <span className="font-medium text-red-600 dark:text-red-400">{log.action}</span>
+                  <span className="text-gray-500 dark:text-gray-400 text-sm ml-2">by {log.user_id ? log.user_id.slice(0, 8) : 'System'}</span>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">{log.details}</p>
                 </div>
-                <span className="text-xs text-gray-500">{new Date(log.created_at).toLocaleTimeString()}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(log.created_at).toLocaleTimeString()}</span>
               </div>
             ))}
           </div>
@@ -308,92 +398,99 @@ const AuditDashboard: React.FC = () => {
       )}
       
       {/* Logs Table */}
-      <div className="overflow-x-auto bg-white shadow-md rounded-lg">
-        <div className="p-4 border-b">
-          <h3 className="text-lg font-semibold">Detailed Logs</h3>
+      <div className="overflow-x-auto bg-white dark:bg-gray-800 shadow-md rounded-lg">
+        <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center">
+          <h3 className="text-lg font-semibold dark:text-white">Detailed Logs</h3>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            Showing {tablePage * logsPerTablePage + 1}-{Math.min((tablePage + 1) * logsPerTablePage, logs.length)} of {logs.length}
+          </span>
         </div>
         <table className="min-w-full leading-normal">
           <thead>
             <tr>
-              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                 Time
               </th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                 Action
               </th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                 Resource
               </th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                 User
               </th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                 Details
               </th>
             </tr>
           </thead>
           <tbody>
-            {logs.map((log) => (
+            {logs.slice(tablePage * logsPerTablePage, (tablePage + 1) * logsPerTablePage).map((log) => (
               <tr key={log.id}>
-                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-gray-300">
                   {new Date(log.created_at).toLocaleString()}
                 </td>
-                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-gray-300">
                   <span className="font-medium">{log.action}</span>
                 </td>
-                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
                   <span
                     className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       log.status === 'success'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                        : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                     }`}
                   >
                     {log.status}
                   </span>
                 </td>
-                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-gray-300">
                   {log.resource_type} {log.resource_id ? `(${log.resource_id.slice(0, 8)}...)` : ''}
                 </td>
-                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-gray-300">
                   {log.user_id ? log.user_id.slice(0, 8) : 'System'}
                 </td>
-                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-gray-300">
                   {log.details}
                 </td>
               </tr>
             ))}
             {logs.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
+                <td colSpan={6} className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-center dark:text-gray-400">
                   No logs found
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+        
+        {/* Table Pagination - Separate from data fetch pagination */}
+        <div className="px-4 py-3 border-t dark:border-gray-700 flex justify-between items-center">
+          <button 
+            onClick={() => setTablePage(p => Math.max(0, p - 1))}
+            disabled={tablePage === 0}
+            className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded disabled:opacity-50 dark:text-white text-sm"
+          >
+            Previous
+          </button>
+          <span className="text-sm dark:text-white">
+            Page {tablePage + 1} of {Math.ceil(logs.length / logsPerTablePage)}
+          </span>
+          <button 
+            onClick={() => setTablePage(p => p + 1)}
+            disabled={(tablePage + 1) * logsPerTablePage >= logs.length}
+            className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded disabled:opacity-50 dark:text-white text-sm"
+          >
+            Next
+          </button>
+        </div>
       </div>
       
-      <div className="mt-4 flex justify-between">
-        <button 
-          onClick={() => setPage(p => Math.max(0, p - 1))}
-          disabled={page === 0}
-          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-        >
-          Previous
-        </button>
-        <span className="px-4 py-2">Page {page + 1}</span>
-        <button 
-          onClick={() => setPage(p => p + 1)}
-          disabled={logs.length < limit}
-          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-        >
-          Next
-        </button>
-      </div>
     </div>
   );
 };
