@@ -30,6 +30,7 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
     const [deleteError, setDeleteError] = useState<string | null>(null);
     const [isEditingName, setIsEditingName] = useState(false);
     const [editedName, setEditedName] = useState('');
+    const [newMemberRole, setNewMemberRole] = useState<'admin' | 'member'>('member');
 
     if (isLoadingProject || isLoadingMembers || isLoadingSecrets) return <LoadingSpinner />;
     if (!project) return <Alert type="error" message="Project not found" />;
@@ -38,8 +39,6 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
     const isOwner = String(project.created_by) === String(user?.user_id);
     const isAdmin = currentUserMember?.role === 'admin';
     const canManageMembers = isOwner || isAdmin;
-
-    const [newMemberRole, setNewMemberRole] = useState<'admin' | 'member'>('member');
 
     const handleAddMember = async (e: React.FormEvent) => {
         e.preventDefault();

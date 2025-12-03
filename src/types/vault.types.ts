@@ -64,18 +64,3 @@ export interface DecryptResponse {
   timestamp: string;
 }
 
-export interface DEKInfo {
-  dek_id: number;
-  key_type: "dek";
-  version: number;
-  created_at: string;
-  purpose?: string;
-}
-
-export interface IssueDEKResponse {
-  status: "success" | "error";
-  data: DEKInfo;
-  dek_ciphertext_b64: string;
-  message?: string;
-  timestamp: string;
-}
