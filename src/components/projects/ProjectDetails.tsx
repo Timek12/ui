@@ -31,6 +31,7 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
     const [isEditingName, setIsEditingName] = useState(false);
     const [editedName, setEditedName] = useState('');
     const [newMemberRole, setNewMemberRole] = useState<'admin' | 'member'>('member');
+    const [addMemberError, setAddMemberError] = useState<string | null>(null);
 
     if (isLoadingProject || isLoadingMembers || isLoadingSecrets) return <LoadingSpinner />;
     if (!project) return <Alert type="error" message="Project not found" />;
@@ -43,6 +44,7 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
     const handleAddMember = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            setAddMemberError(null);
             await addMember({ 
                 projectId, 
                 data: { user_id: parseInt(newMemberId), role: newMemberRole } 
@@ -50,8 +52,9 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
             setNewMemberId('');
             setNewMemberRole('member');
             setIsAddMemberModalOpen(false);
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to add member:', err);
+            setAddMemberError(err.data?.detail || 'Failed to add member');
         }
     };
 
@@ -156,7 +159,10 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
                         </h3>
                         {canManageMembers && (
                             <button
-                                onClick={() => setIsAddMemberModalOpen(true)}
+                                onClick={() => {
+                                    setAddMemberError(null);
+                                    setIsAddMemberModalOpen(true);
+                                }}
                                 className="flex items-center gap-2 px-3 py-1.5 text-sm bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
                             >
                                 <UserPlus className="w-4 h-4" />
@@ -239,6 +245,7 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
             )}
 
             <Modal isOpen={isAddMemberModalOpen} onClose={() => setIsAddMemberModalOpen(false)} title="Add Project Member">
+                {addMemberError && <Alert type="error" message={addMemberError} className="mb-4" />}
                 <form onSubmit={handleAddMember} className="space-y-4">
                     <div>
                         <label htmlFor="userId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
