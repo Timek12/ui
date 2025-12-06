@@ -32,6 +32,19 @@ export const KubernetesForm: React.FC<KubernetesFormProps> = ({
       : [{ key: "", value: "" }]
   );
 
+  React.useEffect(() => {
+    if (initialData) {
+      setName(initialData.name || "");
+      setDescription(initialData.description || "");
+      setNamespace(initialData.namespace || "default");
+      setData(
+        initialData.data && initialData.data.length > 0
+          ? initialData.data
+          : [{ key: "", value: "" }]
+      );
+    }
+  }, [initialData]);
+
   const addDataField = () => {
     setData([...data, { key: "", value: "" }]);
   };

@@ -28,6 +28,18 @@ export const TextDataForm: React.FC<TextDataFormProps> = ({
       : [{ key: "", value: "" }]
   );
 
+  React.useEffect(() => {
+    if (initialData) {
+      setName(initialData.name || "");
+      setDescription(initialData.description || "");
+      setFields(
+        initialData.fields && initialData.fields.length > 0
+          ? initialData.fields
+          : [{ key: "", value: "" }]
+      );
+    }
+  }, [initialData]);
+
   const addField = () => {
     setFields([...fields, { key: "", value: "" }]);
   };

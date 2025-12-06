@@ -86,6 +86,7 @@ export interface DataResponse {
 
   metadata?: DataMetadata;
   project_id?: string;
+  decrypt_error?: string;
 }
 
 export interface DataUpdate {

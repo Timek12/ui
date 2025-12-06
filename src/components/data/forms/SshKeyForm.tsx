@@ -32,6 +32,18 @@ export const SshKeyForm: React.FC<SshKeyFormProps> = ({
   const [username, setUsername] = useState(initialData?.username || "");
   const [showPassphrase, setShowPassphrase] = useState(false);
 
+  React.useEffect(() => {
+    if (initialData) {
+      setName(initialData.name || "");
+      setDescription(initialData.description || "");
+      setPrivateKey(initialData.privateKey || "");
+      setPublicKey(initialData.publicKey || "");
+      setPassphrase(initialData.passphrase || "");
+      setHost(initialData.host || "");
+      setUsername(initialData.username || "");
+    }
+  }, [initialData]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({

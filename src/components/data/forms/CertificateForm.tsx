@@ -32,6 +32,17 @@ export const CertificateForm: React.FC<CertificateFormProps> = ({
   const [passphrase, setPassphrase] = useState(initialData?.passphrase || "");
   const [showPassphrase, setShowPassphrase] = useState(false);
 
+  React.useEffect(() => {
+    if (initialData) {
+      setName(initialData.name || "");
+      setDescription(initialData.description || "");
+      setCertificate(initialData.certificate || "");
+      setPrivateKey(initialData.privateKey || "");
+      setChain(initialData.chain || "");
+      setPassphrase(initialData.passphrase || "");
+    }
+  }, [initialData]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({

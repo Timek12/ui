@@ -24,6 +24,14 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({
   const [apiKey, setApiKey] = useState(initialData?.apiKey || "");
   const [showKey, setShowKey] = useState(false);
 
+  React.useEffect(() => {
+    if (initialData) {
+      setName(initialData.name || "");
+      setDescription(initialData.description || "");
+      setApiKey(initialData.apiKey || "");
+    }
+  }, [initialData]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({

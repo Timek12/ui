@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 import { skipToken } from "@reduxjs/toolkit/query/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -98,10 +98,16 @@ const DataPage: React.FC = () => {
   const [updateData] = useUpdateDataMutation();
   const [deleteData] = useDeleteDataMutation();
   
-  const { data: fullData, isLoading: isLoadingFullData } = useGetDataByIdQuery(
+  const { data: fullData, isLoading: isLoadingFullData, refetch } = useGetDataByIdQuery(
     editingDataId ? { id: editingDataId, projectId: selectedProjectId || undefined } : skipToken,
-    { skip: !editingDataId }
+    { skip: !editingDataId, refetchOnMountOrArgChange: true }
   );
+
+  useEffect(() => {
+    if (editingDataId) {
+        refetch();
+    }
+  }, [editingDataId, refetch]);
 
   const getTypeBadge = (type: string) => {
     const badge = TYPE_BADGES[type] || {
@@ -497,6 +503,9 @@ const DataPage: React.FC = () => {
         title={`Edit Secret - ${editingData?.data_type || ""}`}
         size="lg"
       >
+        {fullData?.decrypt_error && (
+            <Alert type="error" message={`Decryption error: ${fullData.decrypt_error}`} className="mb-4" />
+        )}
         {isLoadingFullData ? (
           <div className="flex justify-center items-center py-8">
             <LoadingSpinner size="md" message="Loading secret data..." />

@@ -28,6 +28,16 @@ export const CredentialsForm: React.FC<CredentialsFormProps> = ({
   const [url, setUrl] = useState(initialData?.url || "");
   const [showPassword, setShowPassword] = useState(false);
 
+  React.useEffect(() => {
+    if (initialData) {
+      setName(initialData.name || "");
+      setDescription(initialData.description || "");
+      setUsername(initialData.username || "");
+      setPassword(initialData.password || "");
+      setUrl(initialData.url || "");
+    }
+  }, [initialData]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({
