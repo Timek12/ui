@@ -6,9 +6,6 @@ export interface UserManagementItem {
   email: string;
   name: string | null;
   role: "user" | "admin";
-  auth_method: string;
-  provider: string;
-  email_verified: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -57,7 +54,6 @@ const adminApi = api.injectEndpoints({
       query: ({ userId, role }) => ({
         url: `/auth/admin/users/${userId}`,
         method: "PUT",
-        body: role,
       }),
       invalidatesTags: ["Users"],
     }),

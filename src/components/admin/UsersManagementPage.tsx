@@ -2,9 +2,9 @@ import { Shield, Trash2, User as UserIcon } from "lucide-react";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import {
-  useDeleteUserMutation,
-  useGetAllUsersQuery,
-  useUpdateUserRoleMutation,
+    useDeleteUserMutation,
+    useGetAllUsersQuery,
+    useUpdateUserRoleMutation,
 } from "../../services/adminApi";
 import { RootState } from "../../store";
 import Alert from "../common/Alert";
@@ -118,9 +118,6 @@ const UsersManagementPage: React.FC = () => {
                   Email
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Provider
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Role
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -151,19 +148,6 @@ const UsersManagementPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900 dark:text-white">{user.email}</div>
-                    {user.email_verified ? (
-                      <span className="text-xs text-green-600">✓ Verified</span>
-                    ) : (
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        Not verified
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white">{user.provider}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      {user.auth_method}
-                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <select

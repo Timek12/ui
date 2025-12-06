@@ -3,15 +3,10 @@ export interface UserPublic {
   user_id: number;
   email: string;
   name: string | null;
-  avatar_url: string | null;
-  provider: string;
   role: "user" | "admin";
 }
 
 export interface UserResponse extends UserPublic {
-  auth_method: string;
-  provider_user_id: string | null;
-  email_verified: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -20,9 +15,6 @@ export interface UserCreate {
   email: string;
   name?: string;
   password: string;
-  avatar_url?: string;
-  provider?: string;
-  auth_method?: string;
 }
 
 export interface LoginCredentials {
