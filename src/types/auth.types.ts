@@ -50,10 +50,7 @@ export interface MessageResponse {
   message: string;
 }
 
-export interface LogoutAllResponse {
-  message: string;
-  revoked_tokens: number;
-}
+
 
 export interface TokenVerificationResponse {
   valid: boolean;
@@ -62,14 +59,4 @@ export interface TokenVerificationResponse {
   expires_at?: number;
 }
 
-export interface Session {
-  jti: string;
-  user_id: number;
-  device?: string;
-  ip_address?: string;
-  created_at: string;
-  expires_at: string;
-  is_current: boolean;
-}
 
-export type SessionsResponse = Session[];

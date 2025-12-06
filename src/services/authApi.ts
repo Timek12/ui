@@ -1,13 +1,11 @@
 import type {
-  LoginCredentials,
-  LoginResponse,
-  LogoutAllResponse,
-  MessageResponse,
-  RefreshTokenRequest,
-  RefreshTokenResponse,
-  SessionsResponse,
-  UserCreate,
-  UserPublic,
+    LoginCredentials,
+    LoginResponse,
+    MessageResponse,
+    RefreshTokenRequest,
+    RefreshTokenResponse,
+    UserCreate,
+    UserPublic
 } from "../types/auth.types";
 import { api } from "./api";
 
@@ -57,31 +55,7 @@ export const authApi = api.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["User", "Sessions"],
-    }),
-
-    // Logout from all devices
-    logoutAll: builder.mutation<LogoutAllResponse, void>({
-      query: () => ({
-        url: "/auth/logout-all",
-        method: "POST",
-      }),
-      invalidatesTags: ["User", "Sessions"],
-    }),
-
-    // Get active sessions
-    getSessions: builder.query<SessionsResponse, void>({
-      query: () => "/auth/sessions",
-      providesTags: ["Sessions"],
-    }),
-
-    // Revoke specific session
-    revokeSession: builder.mutation<MessageResponse, string>({
-      query: (jti) => ({
-        url: `/auth/sessions/${jti}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Sessions"],
+      invalidatesTags: ["User"],
     }),
 
     // Verify token
@@ -100,8 +74,5 @@ export const {
   useRefreshTokenMutation,
   useGetCurrentUserQuery,
   useLogoutMutation,
-  useLogoutAllMutation,
-  useGetSessionsQuery,
-  useRevokeSessionMutation,
   useVerifyTokenQuery,
 } = authApi;
