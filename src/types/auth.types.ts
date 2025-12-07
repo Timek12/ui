@@ -39,11 +39,7 @@ export interface RefreshTokenRequest {
   refresh_token: string;
 }
 
-export interface RefreshTokenResponse {
-  access_token: string;
-  token_type: "bearer";
-  expires_in: number;
-}
+
 
 // Response Types
 export interface MessageResponse {

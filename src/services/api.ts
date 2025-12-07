@@ -1,12 +1,12 @@
 import {
-  BaseQueryFn,
-  createApi,
-  FetchArgs,
-  fetchBaseQuery,
-  FetchBaseQueryError,
+    BaseQueryFn,
+    createApi,
+    FetchArgs,
+    fetchBaseQuery,
+    FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "../store";
-import { logout, setAccessToken } from "../store/authSlice";
+import { logout, setTokens } from "../store/authSlice";
 
 // Base query with authentication
 const baseQuery = fetchBaseQuery({
@@ -45,9 +45,17 @@ const baseQueryWithReauth: BaseQueryFn<
       );
 
       if (refreshResult.data) {
-        // Store the new access token
-        const data = refreshResult.data as { access_token: string };
-        api.dispatch(setAccessToken(data.access_token));
+        // Store the new access and refresh tokens
+        const data = refreshResult.data as {
+          access_token: string;
+          refresh_token: string;
+        };
+        api.dispatch(
+          setTokens({
+            accessToken: data.access_token,
+            refreshToken: data.refresh_token,
+          })
+        );
 
         // Retry the original request with the new token
         result = await baseQuery(args, api, extraOptions);

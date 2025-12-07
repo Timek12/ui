@@ -3,7 +3,7 @@ import type {
     LoginResponse,
     MessageResponse,
     RefreshTokenRequest,
-    RefreshTokenResponse,
+    TokenPair,
     UserCreate,
     UserPublic
 } from "../types/auth.types";
@@ -34,7 +34,7 @@ export const authApi = api.injectEndpoints({
     }),
 
     // Refresh access token
-    refreshToken: builder.mutation<RefreshTokenResponse, RefreshTokenRequest>({
+    refreshToken: builder.mutation<TokenPair, RefreshTokenRequest>({
       query: (request) => ({
         url: "/auth/refresh",
         method: "POST",
