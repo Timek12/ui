@@ -37,15 +37,7 @@ const adminApi = api.injectEndpoints({
       providesTags: ["Users"],
     }),
 
-    getUserById: builder.query<UserManagementItem, number>({
-      query: (userId) => ({
-        url: `/auth/admin/users/${userId}`,
-        method: "GET",
-      }),
-      providesTags: (_result, _error, userId) => [
-        { type: "Users", id: userId },
-      ],
-    }),
+
 
     updateUserRole: builder.mutation<
       UserManagementItem,
@@ -75,15 +67,7 @@ const adminApi = api.injectEndpoints({
       providesTags: ["AdminData"],
     }),
 
-    getUserData: builder.query<AdminDataItem[], number>({
-      query: (userId) => ({
-        url: `/api/admin/data/user/${userId}`,
-        method: "GET",
-      }),
-      providesTags: (_result, _error, userId) => [
-        { type: "AdminData", id: userId },
-      ],
-    }),
+
 
     deleteAnyData: builder.mutation<void, string>({
       query: (dataId) => ({
@@ -97,10 +81,10 @@ const adminApi = api.injectEndpoints({
 
 export const {
   useGetAllUsersQuery,
-  useGetUserByIdQuery,
+
   useUpdateUserRoleMutation,
   useDeleteUserMutation,
   useGetAllDataQuery,
-  useGetUserDataQuery,
+
   useDeleteAnyDataMutation,
 } = adminApi;

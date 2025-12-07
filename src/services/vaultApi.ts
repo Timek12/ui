@@ -1,12 +1,8 @@
 import type {
-    DecryptRequest,
-    DecryptResponse,
-    EncryptRequest,
-    EncryptResponse,
     InitRequest,
 
     StatusResponse,
-    UnsealRequest,
+    UnsealRequest
 } from "../types/vault.types";
 import { api } from "./api";
 
@@ -48,23 +44,7 @@ export const vaultApi = api.injectEndpoints({
     }),
 
 
-    // Encrypt data
-    encryptData: builder.mutation<EncryptResponse, EncryptRequest>({
-      query: (request) => ({
-        url: "/api/crypto/encrypt",
-        method: "POST",
-        body: request,
-      }),
-    }),
 
-    // Decrypt data
-    decryptData: builder.mutation<DecryptResponse, DecryptRequest>({
-      query: (request) => ({
-        url: "/api/crypto/decrypt",
-        method: "POST",
-        body: request,
-      }),
-    }),
   }),
 });
 
@@ -74,6 +54,5 @@ export const {
   useSealVaultMutation,
   useGetVaultStatusQuery,
 
-  useEncryptDataMutation,
-  useDecryptDataMutation,
+
 } = vaultApi;
