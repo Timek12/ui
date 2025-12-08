@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useUpdateProjectMutation } from '../../services/projectsApi';
 import { Project } from '../../types/projects';
 import Alert from '../common/Alert';
@@ -11,6 +12,7 @@ interface EditProjectModalProps {
 }
 
 export const EditProjectModal: React.FC<EditProjectModalProps> = ({ isOpen, onClose, project }) => {
+    const { t } = useTranslation();
     const [name, setName] = useState('');
     const [updateProject, { isLoading, error }] = useUpdateProjectMutation();
 
@@ -33,7 +35,7 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({ isOpen, onCl
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Edit Project">
+        <Modal isOpen={isOpen} onClose={onClose} title={t('projects.edit')}>
             <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
                     <Alert 
@@ -41,14 +43,14 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({ isOpen, onCl
                         message={
                             'data' in (error as any) 
                                 ? (error as any).data.detail 
-                                : 'Failed to update project'
+                                : t('projects.updateError')
                         } 
                     />
                 )}
                 
                 <div>
                     <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Project Name
+                        {t('projects.name')}
                     </label>
                     <input
                         type="text"
@@ -67,14 +69,14 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({ isOpen, onCl
                         onClick={onClose}
                         className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600"
                     >
-                        Cancel
+                        {t('common.cancel')}
                     </button>
                     <button
                         type="submit"
                         disabled={isLoading}
                         className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isLoading ? 'Saving...' : 'Save Changes'}
+                        {isLoading ? t('projects.saving') : t('projects.saveChanges')}
                     </button>
                 </div>
             </form>

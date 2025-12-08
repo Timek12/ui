@@ -46,6 +46,7 @@ const adminApi = api.injectEndpoints({
       query: ({ userId, role }) => ({
         url: `/auth/admin/users/${userId}`,
         method: "PUT",
+        body: role,
       }),
       invalidatesTags: ["Users"],
     }),

@@ -1,5 +1,6 @@
 import { Activity, Clock, Folder, Key, Lock, Plus, Shield, Users } from "lucide-react";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { useGetLogsQuery } from "../../services/auditApi";
@@ -10,6 +11,7 @@ import { RootState } from "../../store";
 import LoadingSpinner from "../common/LoadingSpinner";
 
 const DashboardHome: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
   const isAdmin = user?.role === "admin";
@@ -23,21 +25,21 @@ const DashboardHome: React.FC = () => {
 
   const stats = [
     {
-      title: "Total Secrets",
+      title: t('dashboard.totalSecrets'),
       value: dataItems?.length || 0,
       icon: Key,
       color: "from-blue-500 to-blue-600",
       link: "/dashboard/data",
     },
     {
-      title: "Total Projects",
+      title: t('dashboard.totalProjects'),
       value: projects?.length || 0,
       icon: Folder,
       color: "from-emerald-500 to-emerald-600",
       link: "/dashboard/projects",
     },
     {
-      title: "Active Secrets",
+      title: t('dashboard.activeSecrets'),
       value: dataItems?.filter((s) => s.is_active).length || 0,
       icon: Activity,
       color: "from-green-500 to-green-600",
@@ -46,8 +48,8 @@ const DashboardHome: React.FC = () => {
     ...(isAdmin
       ? [
           {
-            title: "Vault Status",
-            value: vaultStatus?.vault.sealed ? "Sealed" : "Unsealed",
+            title: t('dashboard.vaultStatus'),
+            value: vaultStatus?.vault.sealed ? t('dashboard.sealed') : t('dashboard.unsealed'),
             icon: Lock,
             color: vaultStatus?.vault.sealed ? "from-red-500 to-red-600" : "from-emerald-500 to-emerald-600",
             link: "/dashboard/vault",
@@ -59,7 +61,7 @@ const DashboardHome: React.FC = () => {
   if (vaultLoading || dataLoading || projectsLoading || auditLoading) {
     return (
       <div className="flex justify-center items-center h-96">
-        <LoadingSpinner size="lg" message="Loading dashboard..." />
+        <LoadingSpinner size="lg" message={t('dashboard.loading')} />
       </div>
     );
   }
@@ -69,10 +71,10 @@ const DashboardHome: React.FC = () => {
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
-            Dashboard
+            {t('dashboard.title')}
           </h1>
           <p className="text-gray-600 dark:text-gray-300 mt-2 text-lg">
-            Welcome back, {user?.name || user?.email}
+            {t('dashboard.welcome', { name: user?.name || user?.email })}
           </p>
         </div>
         <div className="flex gap-3">
@@ -81,7 +83,7 @@ const DashboardHome: React.FC = () => {
                 className="btn-primary flex items-center gap-2"
             >
                 <Plus className="w-4 h-4" />
-                New Secret
+                {t('dashboard.newSecret')}
             </button>
         </div>
       </div>
@@ -119,10 +121,10 @@ const DashboardHome: React.FC = () => {
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     <Clock className="w-5 h-5 text-primary-500" />
-                    Recent Activity
+                    {t('dashboard.recentActivity')}
                 </h2>
                 <Link to="/dashboard/audit" className="text-sm text-primary-600 hover:text-primary-700 font-medium">
-                    View All
+                    {t('dashboard.viewAll')}
                 </Link>
             </div>
             
@@ -144,7 +146,7 @@ const DashboardHome: React.FC = () => {
                                             {log.action}
                                         </p>
                                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                                            by {log.user_id ? log.user_id.slice(0, 8) : 'System'} • {log.resource_type}
+                                            by {log.user_id ? log.user_id.slice(0, 8) : t('dashboard.system')} • {log.resource_type}
                                         </p>
                                     </div>
                                 </div>
@@ -155,7 +157,7 @@ const DashboardHome: React.FC = () => {
                         ))
                     ) : (
                         <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                            No recent activity found
+                            {t('dashboard.noActivity')}
                         </div>
                     )}
                 </div>
@@ -166,7 +168,7 @@ const DashboardHome: React.FC = () => {
         <div className="space-y-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <Shield className="w-5 h-5 text-primary-500" />
-                Quick Actions
+                {t('dashboard.quickActions')}
             </h2>
             
             <div className="grid gap-4">
@@ -179,8 +181,8 @@ const DashboardHome: React.FC = () => {
                             <Key className="w-6 h-6" />
                         </div>
                         <div>
-                            <h3 className="font-semibold text-gray-900 dark:text-white">Add New Secret</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Store a new secure credential</p>
+                            <h3 className="font-semibold text-gray-900 dark:text-white">{t('dashboard.addNewSecret')}</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard.storeCredential')}</p>
                         </div>
                     </div>
                 </button>
@@ -194,8 +196,8 @@ const DashboardHome: React.FC = () => {
                             <Folder className="w-6 h-6" />
                         </div>
                         <div>
-                            <h3 className="font-semibold text-gray-900 dark:text-white">Create Project</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Organize secrets into groups</p>
+                            <h3 className="font-semibold text-gray-900 dark:text-white">{t('dashboard.createProject')}</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard.organizeSecrets')}</p>
                         </div>
                     </div>
                 </button>
@@ -210,8 +212,8 @@ const DashboardHome: React.FC = () => {
                                 <Users className="w-6 h-6" />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-gray-900 dark:text-white">Manage Users</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">Administer system access</p>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">{t('dashboard.manageUsers')}</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard.administerAccess')}</p>
                             </div>
                         </div>
                     </button>

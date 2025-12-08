@@ -1,6 +1,8 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const DebugLogs: React.FC = () => {
+  const { t } = useTranslation();
   const adminRouteDebug = JSON.parse(
     localStorage.getItem("adminRouteDebug") || "[]"
   );
@@ -27,19 +29,19 @@ const DebugLogs: React.FC = () => {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Debug Logs</h1>
+          <h1 className="text-3xl font-bold">{t('debug.title')}</h1>
           <button
             onClick={clearLogs}
             className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
           >
-            Clear Logs
+            {t('debug.clear')}
           </button>
         </div>
 
         {/* Logout Reason */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4 text-red-600">
-            Logout Reason
+            {t('debug.logoutReason')}
           </h2>
           <pre className="bg-gray-100 p-4 rounded overflow-x-auto">
             {JSON.stringify(logoutReason, null, 2)}
@@ -49,7 +51,7 @@ const DebugLogs: React.FC = () => {
         {/* Last API Error */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4 text-orange-600">
-            Last API Error
+            {t('debug.lastApiError')}
           </h2>
           <pre className="bg-gray-100 p-4 rounded overflow-x-auto">
             {JSON.stringify(lastApiError, null, 2)}
@@ -59,7 +61,7 @@ const DebugLogs: React.FC = () => {
         {/* Admin Route Redirect */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4 text-yellow-600">
-            Admin Route Redirect
+            {t('debug.adminRedirect')}
           </h2>
           <pre className="bg-gray-100 p-4 rounded overflow-x-auto">
             {JSON.stringify(adminRouteRedirect, null, 2)}
@@ -69,7 +71,7 @@ const DebugLogs: React.FC = () => {
         {/* Admin Route Debug History */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4 text-blue-600">
-            Admin Route Debug History (Last 10 Checks)
+            {t('debug.adminHistory')}
           </h2>
           <pre className="bg-gray-100 p-4 rounded overflow-x-auto">
             {JSON.stringify(adminRouteDebug, null, 2)}
@@ -79,7 +81,7 @@ const DebugLogs: React.FC = () => {
         {/* Auth State */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4 text-green-600">
-            Current Auth State (localStorage)
+            {t('debug.authState')}
           </h2>
           <pre className="bg-gray-100 p-4 rounded overflow-x-auto">
             {authState || "null"}

@@ -13,23 +13,17 @@ import {
     Users
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { api } from "../../services/api";
 import { useLogoutMutation } from "../../services/authApi";
 import { RootState } from "../../store";
 import { logout } from "../../store/authSlice";
-
-const navItems = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/dashboard/data", label: "Secrets", icon: Database },
-  { to: "/dashboard/projects", label: "Projects", icon: Folder },
-  { to: "/dashboard/audit", label: "Audit", icon: FileText },
-  { to: "/dashboard/users", label: "Users", icon: Users, adminOnly: true },
-  { to: "/dashboard/vault", label: "Vault", icon: Shield, adminOnly: true },
-];
+import LanguageSwitcher from "../common/LanguageSwitcher";
 
 const DashboardLayout: React.FC = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
@@ -43,6 +37,15 @@ const DashboardLayout: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     return localStorage.getItem("sidebarCollapsed") === "true";
   });
+
+  const navItems = [
+    { to: "/dashboard", label: t('nav.dashboard'), icon: LayoutDashboard },
+    { to: "/dashboard/data", label: t('nav.secrets'), icon: Database },
+    { to: "/dashboard/projects", label: t('nav.projects'), icon: Folder },
+    { to: "/dashboard/audit", label: t('nav.audit'), icon: FileText },
+    { to: "/dashboard/users", label: t('nav.users'), icon: Users, adminOnly: true },
+    { to: "/dashboard/vault", label: t('nav.vault'), icon: Shield, adminOnly: true },
+  ];
 
   useEffect(() => {
     if (darkMode) {
@@ -95,10 +98,11 @@ const DashboardLayout: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-4">
+              <LanguageSwitcher />
               <button
                 onClick={() => setDarkMode(!darkMode)}
                 className="p-2 text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-white/10 rounded-lg transition-colors"
-                aria-label="Toggle dark mode"
+                aria-label={t('common.toggleDarkMode')}
               >
                 {darkMode ? (
                   <Sun className="w-5 h-5" />
@@ -117,7 +121,7 @@ const DashboardLayout: React.FC = () => {
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
               >
                 <LogOut className="w-4 h-4" />
-                Logout
+                {t('auth.logout')}
               </button>
             </div>
           </div>
@@ -133,7 +137,7 @@ const DashboardLayout: React.FC = () => {
               <button
                 onClick={toggleSidebar}
                 className="absolute -right-3 top-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full p-1.5 shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors z-10 text-primary-600 dark:text-primary-400"
-                aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                aria-label={sidebarCollapsed ? t('common.expandSidebar') : t('common.collapseSidebar')}
               >
                 {sidebarCollapsed ? (
                   <ChevronRight className="w-3 h-3" />

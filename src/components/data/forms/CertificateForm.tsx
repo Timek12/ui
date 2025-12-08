@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface CertificateFormProps {
   onSubmit: (data: any) => void;
@@ -20,6 +21,7 @@ export const CertificateForm: React.FC<CertificateFormProps> = ({
   isEditing = false,
   initialData,
 }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState(initialData?.name || "");
   const [description, setDescription] = useState(
     initialData?.description || ""
@@ -60,7 +62,7 @@ export const CertificateForm: React.FC<CertificateFormProps> = ({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Secret Name *
+          {t('forms.secretName')}
         </label>
         <input
           type="text"
@@ -74,7 +76,7 @@ export const CertificateForm: React.FC<CertificateFormProps> = ({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Description
+          {t('forms.description')}
         </label>
         <textarea
           value={description}
@@ -86,7 +88,7 @@ export const CertificateForm: React.FC<CertificateFormProps> = ({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Certificate (PEM) *
+          {t('forms.certificate')}
         </label>
         <textarea
           value={certificate}
@@ -100,7 +102,7 @@ export const CertificateForm: React.FC<CertificateFormProps> = ({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Private Key (PEM) *
+          {t('forms.privateKey')}
         </label>
         <textarea
           value={privateKey}
@@ -114,7 +116,7 @@ export const CertificateForm: React.FC<CertificateFormProps> = ({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Certificate Chain (Optional)
+          {t('forms.chain')}
         </label>
         <textarea
           value={chain}
@@ -127,7 +129,7 @@ export const CertificateForm: React.FC<CertificateFormProps> = ({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Passphrase (Optional)
+          {t('forms.passphrase')}
         </label>
         <div className="relative">
           <input
@@ -141,7 +143,7 @@ export const CertificateForm: React.FC<CertificateFormProps> = ({
             onClick={() => setShowPassphrase(!showPassphrase)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
           >
-            {showPassphrase ? "Hide" : "Show"}
+            {showPassphrase ? t('forms.hide') : t('forms.show')}
           </button>
         </div>
       </div>
@@ -151,14 +153,14 @@ export const CertificateForm: React.FC<CertificateFormProps> = ({
           type="submit"
           className="flex-1 bg-primary-600 dark:bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
         >
-          {isEditing ? "Update Secret" : "Create Secret"}
+          {isEditing ? t('forms.update') : t('forms.create')}
         </button>
         <button
           type="button"
           onClick={onCancel}
           className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300"
         >
-          Cancel
+          {t('forms.cancel')}
         </button>
       </div>
     </form>

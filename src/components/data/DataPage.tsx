@@ -16,6 +16,7 @@ import {
 
 import { skipToken } from "@reduxjs/toolkit/query/react";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -36,56 +37,22 @@ import { KubernetesForm } from "./forms/KubernetesForm";
 import { SshKeyForm } from "./forms/SshKeyForm";
 import { TextDataForm } from "./forms/TextDataForm";
 
-const TYPE_BADGES: Record<
-  string,
-  {
-    label: string;
-    Icon: React.ComponentType<{ className?: string }>;
-    className: string;
-  }
-> = {
-  text: {
-    label: "Text",
-    Icon: FileText,
-    className: "bg-blue-100 text-blue-800 border-blue-200",
-  },
-  kubernetes: {
-    label: "Kubernetes",
-    Icon: Box,
-    className: "bg-indigo-100 text-indigo-800 border-indigo-200",
-  },
-  credentials: {
-    label: "Credentials",
-    Icon: UserCircle,
-    className: "bg-green-100 text-green-800 border-green-200",
-  },
-  api_key: {
-    label: "API Key",
-    Icon: Cpu,
-    className: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  },
-  ssh_key: {
-    label: "SSH Key",
-    Icon: Terminal,
-    className: "bg-orange-100 text-orange-800 border-orange-200",
-  },
-  certificate: {
-    label: "Certificate",
-    Icon: Shield,
-    className: "bg-red-100 text-red-800 border-red-200",
-  },
-};
-
 const DataPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingData, setEditingData] = useState<DataListItem | null>(null);
   const [editingDataId, setEditingDataId] = useState<string | null>(null);
   const [editProjectId, setEditProjectId] = useState<string>("");
+
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  
+  // Delete Modal State
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [dataToDelete, setDataToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const { user } = useSelector((state: any) => state.auth);
   const { data: projects } = useListProjectsQuery();
@@ -110,7 +77,40 @@ const DataPage: React.FC = () => {
   }, [editingDataId, refetch]);
 
   const getTypeBadge = (type: string) => {
-    const badge = TYPE_BADGES[type] || {
+    const badges: Record<string, { label: string; Icon: any; className: string }> = {
+        text: {
+            label: t('types.text'),
+            Icon: FileText,
+            className: "bg-blue-100 text-blue-800 border-blue-200",
+        },
+        kubernetes: {
+            label: t('types.kubernetes'),
+            Icon: Box,
+            className: "bg-indigo-100 text-indigo-800 border-indigo-200",
+        },
+        credentials: {
+            label: t('types.credentials'),
+            Icon: UserCircle,
+            className: "bg-green-100 text-green-800 border-green-200",
+        },
+        api_key: {
+            label: t('types.apiKey'),
+            Icon: Cpu,
+            className: "bg-emerald-100 text-emerald-800 border-emerald-200",
+        },
+        ssh_key: {
+            label: t('types.sshKey'),
+            Icon: Terminal,
+            className: "bg-orange-100 text-orange-800 border-orange-200",
+        },
+        certificate: {
+            label: t('types.certificate'),
+            Icon: Shield,
+            className: "bg-red-100 text-red-800 border-red-200",
+        },
+    };
+
+    const badge = badges[type] || {
       label: type,
       Icon: FileText,
       className: "bg-gray-100 text-gray-800 border-gray-200",
@@ -140,15 +140,28 @@ const DataPage: React.FC = () => {
     setError(null);
   };
 
-  const handleDeleteData = async (id: string, name: string) => {
-    if (window.confirm(`Are you sure you want to delete secret "${name}"?`)) {
-      try {
-        await deleteData(id).unwrap();
-        setSuccess(`Secret "${name}" deleted successfully`);
-      } catch (err: any) {
-        setError(err?.data?.detail || "Failed to delete secret");
-      }
+  const handleDeleteClick = (id: string, name: string) => {
+    setDataToDelete({ id, name });
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!dataToDelete) return;
+    
+    try {
+      await deleteData(dataToDelete.id).unwrap();
+      setSuccess(t('secrets.deleteSuccess', { name: dataToDelete.name }));
+      setIsDeleteModalOpen(false);
+      setDataToDelete(null);
+    } catch (err: any) {
+      setError(err?.data?.detail || t('secrets.deleteError'));
+      setIsDeleteModalOpen(false);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setDataToDelete(null);
   };
 
   const handleUpdateSubmit = async (formData: any) => {
@@ -200,12 +213,12 @@ const DataPage: React.FC = () => {
         data: updatePayload,
       }).unwrap();
 
-      setSuccess("Secret updated successfully!");
+      setSuccess(t('secrets.updateSuccess'));
       setIsEditModalOpen(false);
       setEditingData(null);
       setEditingDataId(null);
     } catch (err: any) {
-      setError(err?.data?.detail || "Failed to update secret");
+      setError(err?.data?.detail || t('secrets.updateError'));
     }
   };
 
@@ -316,7 +329,7 @@ const DataPage: React.FC = () => {
              {/* Project Assignment */}
              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                 Project Assignment
+                 {t('secrets.projectAssignment')}
                </label>
                <select
                  value={editProjectId}
@@ -324,7 +337,7 @@ const DataPage: React.FC = () => {
                  disabled={!fullData || !user || String(user.user_id) !== String(fullData.user_id)}
                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                >
-                 <option value="">Personal</option>
+                 <option value="">{t('secrets.personalOption')}</option>
                  {projects?.map((project) => (
                    <option key={project.id} value={project.id}>
                      {project.name}
@@ -333,8 +346,8 @@ const DataPage: React.FC = () => {
                </select>
                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                  {user && fullData && String(user.user_id) === String(fullData.user_id)
-                   ? "You can change the project assignment as the owner."
-                   : "Only the owner can change the project assignment."}
+                   ? t('secrets.ownerChange')
+                   : t('secrets.notOwnerChange')}
                </p>
              </div>
             {formContent}
@@ -348,14 +361,14 @@ const DataPage: React.FC = () => {
       setCopiedId(id);
       setTimeout(() => setCopiedId(null), 2000);
     } catch (err) {
-      setError("Failed to copy to clipboard");
+      setError(t('secrets.copyError'));
     }
   };
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-96">
-        <LoadingSpinner size="lg" message="Loading secrets..." />
+        <LoadingSpinner size="lg" message={t('secrets.loading')} />
       </div>
     );
   }
@@ -364,8 +377,8 @@ const DataPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Secrets</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">Manage your encrypted secrets</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('secrets.title')}</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">{t('secrets.subtitle')}</p>
         </div>
         <div className="flex items-center gap-4">
             <div className="relative">
@@ -374,7 +387,7 @@ const DataPage: React.FC = () => {
                     onChange={(e) => setSelectedProjectId(e.target.value)}
                     className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white appearance-none"
                 >
-                    <option value="">Personal Secrets</option>
+                    <option value="">{t('secrets.personal')}</option>
                     {projects?.map((project) => (
                         <option key={project.id} value={project.id}>
                             {project.name}
@@ -388,7 +401,7 @@ const DataPage: React.FC = () => {
             className="btn-primary flex items-center gap-2"
             >
             <Plus className="w-5 h-5" />
-            New Secret
+            {t('secrets.new')}
             </button>
         </div>
       </div>
@@ -428,12 +441,12 @@ const DataPage: React.FC = () => {
 
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-xs text-gray-500 font-mono">
-                      ID: {data.id}
+                      {t('secrets.id')}: {data.id}
                     </span>
                     <button
                       onClick={() => copyToClipboard(data.id, `id-${data.id}`)}
                       className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                      title="Copy ID"
+                      title={t('common.copy')}
                     >
                       {copiedId === `id-${data.id}` ? (
                         <Check className="w-3 h-3 text-green-600" />
@@ -444,14 +457,14 @@ const DataPage: React.FC = () => {
                   </div>
 
                   <p className="text-gray-600 text-sm mb-3">
-                    {data.description || "No description"}
+                    {data.description || t('secrets.noDescription', 'No description')}
                   </p>
 
                   <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
-                    <span>Version: {data.version ?? "N/A"}</span>
+                    <span>{t('secrets.version')}: {data.version ?? "N/A"}</span>
                     <span>•</span>
                     <span>
-                      Created:{" "}
+                      {t('secrets.created')}:{" "}
                       {new Date(data.created_at).toLocaleDateString("pl-PL")}
                     </span>
                   </div>
@@ -461,14 +474,14 @@ const DataPage: React.FC = () => {
                   <button
                     onClick={() => handleEditData(data)}
                     className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    title="Edit secret"
+                    title={t('common.edit')}
                   >
                     <Edit2 className="w-5 h-5" />
                   </button>
                   <button
-                    onClick={() => handleDeleteData(data.id, data.name)}
+                    onClick={() => handleDeleteClick(data.id, data.name)}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Delete secret"
+                    title={t('common.delete')}
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
@@ -481,17 +494,17 @@ const DataPage: React.FC = () => {
         <div className="card text-center py-12">
           <Key className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No secrets yet
+            {t('secrets.noSecrets')}
           </h3>
           <p className="text-gray-600 mb-4">
-            Get started by creating your first secret
+            {t('secrets.getStarted')}
           </p>
           <button
             onClick={() => navigate("/dashboard/create-data")}
             className="btn-primary inline-flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />
-            Create Secret
+            {t('secrets.createButton')}
           </button>
         </div>
       )}
@@ -500,23 +513,47 @@ const DataPage: React.FC = () => {
       <Modal
         isOpen={isEditModalOpen}
         onClose={handleCancelEdit}
-        title={`Edit Secret - ${editingData?.data_type || ""}`}
+        title={`${t('secrets.editTitle')} - ${editingData?.data_type || ""}`}
         size="lg"
       >
         {fullData?.decrypt_error && (
-            <Alert type="error" message={`Decryption error: ${fullData.decrypt_error}`} className="mb-4" />
+            <Alert type="error" message={`${t('secrets.decryptError', 'Decryption error')}: ${fullData.decrypt_error}`} />
         )}
         {isLoadingFullData ? (
           <div className="flex justify-center items-center py-8">
-            <LoadingSpinner size="md" message="Loading secret data..." />
+            <LoadingSpinner size="md" message={t('secrets.loadingData')} />
           </div>
         ) : editingData ? (
           renderEditForm()
         ) : (
           <div className="text-center py-8 text-gray-500">
-            No data available
+            {t('secrets.noData')}
           </div>
         )}
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={handleCancelDelete}
+        title={t('secrets.deleteTitle', 'Delete Secret')}
+      >
+        <div className="space-y-4">
+          <p className="text-gray-600 dark:text-gray-300">
+            {t('secrets.deleteConfirm', { name: dataToDelete?.name })}
+          </p>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={handleCancelDelete}
+              className="btn-secondary"
+            >
+              {t('common.cancel')}
+            </button>
+            <button onClick={handleConfirmDelete} className="btn-danger">
+              {t('common.delete')}
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

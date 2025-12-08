@@ -1,5 +1,6 @@
 import { Shield, Trash2, User as UserIcon } from "lucide-react";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import {
     useDeleteUserMutation,
@@ -12,6 +13,7 @@ import LoadingSpinner from "../common/LoadingSpinner";
 import Modal from "../common/Modal";
 
 const UsersManagementPage: React.FC = () => {
+  const { t } = useTranslation();
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const { data: users, isLoading, error } = useGetAllUsersQuery();
   const [updateUserRole] = useUpdateUserRoleMutation();
@@ -30,12 +32,22 @@ const UsersManagementPage: React.FC = () => {
         userId,
         role: { role: newRole as "user" | "admin" },
       }).unwrap();
-      setMessage({ type: "success", text: "User role updated successfully" });
+      setMessage({ type: "success", text: t('admin.userRoleUpdated') });
       setTimeout(() => setMessage(null), 3000);
     } catch (err: any) {
+      let errorText = t('admin.userRoleUpdateError');
+      if (err.data?.detail) {
+        if (typeof err.data.detail === 'string') {
+          errorText = err.data.detail;
+        } else if (Array.isArray(err.data.detail)) {
+          errorText = err.data.detail.map((e: any) => e.msg || JSON.stringify(e)).join(', ');
+        } else {
+          errorText = JSON.stringify(err.data.detail);
+        }
+      }
       setMessage({
         type: "error",
-        text: err.data?.detail || "Failed to update user role",
+        text: errorText,
       });
       setTimeout(() => setMessage(null), 5000);
     }
@@ -46,14 +58,24 @@ const UsersManagementPage: React.FC = () => {
 
     try {
       await deleteUser(selectedUser).unwrap();
-      setMessage({ type: "success", text: "User deleted successfully" });
+      setMessage({ type: "success", text: t('admin.userDeleted') });
       setShowDeleteModal(false);
       setSelectedUser(null);
       setTimeout(() => setMessage(null), 3000);
     } catch (err: any) {
+      let errorText = t('admin.userDeleteError');
+      if (err.data?.detail) {
+        if (typeof err.data.detail === 'string') {
+          errorText = err.data.detail;
+        } else if (Array.isArray(err.data.detail)) {
+          errorText = err.data.detail.map((e: any) => e.msg || JSON.stringify(e)).join(', ');
+        } else {
+          errorText = JSON.stringify(err.data.detail);
+        }
+      }
       setMessage({
         type: "error",
-        text: err.data?.detail || "Failed to delete user",
+        text: errorText,
       });
       setShowDeleteModal(false);
       setTimeout(() => setMessage(null), 5000);
@@ -72,14 +94,14 @@ const UsersManagementPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-96">
-        <LoadingSpinner size="lg" message="Loading users..." />
+        <LoadingSpinner size="lg" message={t('admin.loadingUsers')} />
       </div>
     );
   }
 
   if (error) {
     return (
-      <Alert type="error" message="Failed to load users. Please try again." />
+      <Alert type="error" message={t('admin.loadUsersError')} />
     );
   }
 
@@ -87,14 +109,14 @@ const UsersManagementPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">User Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('admin.userManagement')}</h1>
           <p className="text-gray-600 dark:text-gray-300 mt-2">
-            Manage user roles and permissions
+            {t('admin.manageUserRoles')}
           </p>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
           <Shield className="w-4 h-4" />
-          <span>Admin Only</span>
+          <span>{t('admin.adminOnly')}</span>
         </div>
       </div>
 
@@ -112,19 +134,19 @@ const UsersManagementPage: React.FC = () => {
             <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  User
+                  {t('admin.user')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Email
+                  {t('auth.email')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Role
+                  {t('projects.role')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Joined
+                  {t('admin.joined')}
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Actions
+                  {t('common.actions')}
                 </th>
               </tr>
             </thead>
@@ -138,7 +160,7 @@ const UsersManagementPage: React.FC = () => {
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {user.name || "No name"}
+                          {user.name || t('admin.noName')}
                         </div>
                         <div className="text-sm text-gray-500 dark:text-gray-400">
                           ID: {user.user_id}
@@ -164,12 +186,12 @@ const UsersManagementPage: React.FC = () => {
                           : "cursor-pointer"
                       }`}
                     >
-                      <option value="user">User</option>
-                      <option value="admin">Admin</option>
+                      <option value="user">{t('projects.member')}</option>
+                      <option value="admin">{t('projects.admin')}</option>
                     </select>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(user.created_at).toLocaleDateString("en-GB")}
+                    {new Date(user.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
@@ -181,8 +203,8 @@ const UsersManagementPage: React.FC = () => {
                       className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
                       title={
                         user.user_id === currentUser?.user_id
-                          ? "Cannot delete your own account"
-                          : "Delete user"
+                          ? t('admin.cannotDeleteSelf')
+                          : t('common.delete')
                       }
                     >
                       <Trash2 className="w-5 h-5" />
@@ -197,7 +219,7 @@ const UsersManagementPage: React.FC = () => {
         {users && users.length === 0 && (
           <div className="text-center py-12">
             <UserIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500 dark:text-gray-400">No users found</p>
+            <p className="text-gray-500 dark:text-gray-400">{t('admin.noUsers')}</p>
           </div>
         )}
       </div>
@@ -209,12 +231,11 @@ const UsersManagementPage: React.FC = () => {
           setShowDeleteModal(false);
           setSelectedUser(null);
         }}
-        title="Delete User"
+        title={t('admin.deleteUserTitle')}
       >
         <div className="space-y-4">
           <p className="text-gray-600 dark:text-gray-300">
-            Are you sure you want to delete this user? This action cannot be
-            undone. All user data and secrets will be permanently removed.
+            {t('admin.deleteUserConfirm')}
           </p>
           <div className="flex justify-end gap-3">
             <button
@@ -224,10 +245,10 @@ const UsersManagementPage: React.FC = () => {
               }}
               className="btn-secondary"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button onClick={handleDeleteUser} className="btn-danger">
-              Delete User
+              {t('admin.deleteUserButton')}
             </button>
           </div>
         </div>

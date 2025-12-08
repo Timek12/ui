@@ -1,5 +1,6 @@
 import { AlertTriangle, Check, Edit2, Key, Shield, Trash2, UserPlus, X } from 'lucide-react';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useGetDataQuery } from '../../services/dataApi';
@@ -14,6 +15,7 @@ interface ProjectDetailsProps {
 }
 
 export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { user } = useSelector((state: RootState) => state.auth);
     const { data: project, isLoading: isLoadingProject } = useGetProjectQuery(projectId);
@@ -31,10 +33,12 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
     const [isEditingName, setIsEditingName] = useState(false);
     const [editedName, setEditedName] = useState('');
     const [newMemberRole, setNewMemberRole] = useState<'admin' | 'member'>('member');
+
     const [addMemberError, setAddMemberError] = useState<string | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     if (isLoadingProject || isLoadingMembers || isLoadingSecrets) return <LoadingSpinner />;
-    if (!project) return <Alert type="error" message="Project not found" />;
+    if (!project) return <Alert type="error" message={t('projects.notFound')} />;
 
     const currentUserMember = members?.find(m => String(m.user_id) === String(user?.user_id));
     const isOwner = String(project.created_by) === String(user?.user_id);
@@ -54,12 +58,12 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
             setIsAddMemberModalOpen(false);
         } catch (err: any) {
             console.error('Failed to add member:', err);
-            setAddMemberError(err.data?.detail || 'Failed to add member');
+            setAddMemberError(err.data?.detail || t('projects.addMemberError'));
         }
     };
 
     const handleRemoveMember = async (userId: number) => {
-        if (window.confirm('Are you sure you want to remove this member?')) {
+        if (window.confirm(t('projects.removeMemberConfirm'))) {
             try {
                 await removeMember({ projectId, userId }).unwrap();
             } catch (err) {
@@ -68,15 +72,18 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
         }
     };
 
-    const handleDeleteProject = async () => {
-        if (window.confirm('Are you sure you want to delete this project? This action cannot be undone and will delete all project secrets.')) {
-            try {
-                await deleteProject(projectId).unwrap();
-                navigate('/projects');
-            } catch (err: any) {
-                console.error('Failed to delete project:', err);
-                setDeleteError(err.data?.detail || 'Failed to delete project');
-            }
+    const handleDeleteProject = () => {
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDeleteProject = async () => {
+        try {
+            await deleteProject(projectId).unwrap();
+            navigate('/projects');
+        } catch (err: any) {
+            console.error('Failed to delete project:', err);
+            setDeleteError(err.data?.detail || t('projects.deleteError'));
+            setIsDeleteModalOpen(false);
         }
     };
 
@@ -143,7 +150,7 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
                     )}
                 </div>
                 <p className="text-gray-500 dark:text-gray-400">
-                    Created on {new Date(project.created_at).toLocaleDateString()}
+                    {t('projects.created')} {new Date(project.created_at).toLocaleDateString()}
                 </p>
             </div>
 
@@ -155,7 +162,7 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                             <Shield className="w-5 h-5" />
-                            Members
+                            {t('projects.members')}
                         </h3>
                         {canManageMembers && (
                             <button
@@ -166,7 +173,7 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
                                 className="flex items-center gap-2 px-3 py-1.5 text-sm bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
                             >
                                 <UserPlus className="w-4 h-4" />
-                                Add Member
+                                {t('projects.addMember')}
                             </button>
                         )}
                     </div>
@@ -175,7 +182,7 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
                         {members?.map((member) => (
                             <div key={member.user_id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                                 <div>
-                                    <p className="font-medium text-gray-900 dark:text-white">User ID: {member.user_id}</p>
+                                    <p className="font-medium text-gray-900 dark:text-white">{t('projects.userId')}: {member.user_id}</p>
                                     <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{member.role}</p>
                                 </div>
                                 {canManageMembers && member.role !== 'owner' && (
@@ -197,7 +204,7 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                             <Key className="w-5 h-5" />
-                            Project Secrets
+                            {t('projects.projectSecrets')}
                         </h3>
                     </div>
 
@@ -212,7 +219,7 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
                         ))}
                         {secrets?.length === 0 && (
                             <p className="text-center text-gray-500 dark:text-gray-400 py-4">
-                                No secrets shared with this project yet.
+                                {t('projects.noSecrets')}
                             </p>
                         )}
                     </div>
@@ -224,13 +231,13 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
                 <div className="bg-red-50 dark:bg-red-900/10 rounded-lg border border-red-200 dark:border-red-900/30 p-6">
                     <h3 className="text-lg font-semibold text-red-800 dark:text-red-400 flex items-center gap-2 mb-4">
                         <AlertTriangle className="w-5 h-5" />
-                        Danger Zone
+                        {t('projects.dangerZone')}
                     </h3>
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-red-700 dark:text-red-300 font-medium">Delete this project</p>
+                            <p className="text-sm text-red-700 dark:text-red-300 font-medium">{t('projects.deleteProject')}</p>
                             <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                                Once you delete a project, there is no going back. All members will be removed and project secrets will be deleted.
+                                {t('projects.deleteWarning')}
                             </p>
                         </div>
                         <button
@@ -238,18 +245,18 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
                             disabled={isDeletingProject}
                             className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
                         >
-                            {isDeletingProject ? 'Deleting...' : 'Delete Project'}
+                            {isDeletingProject ? t('projects.deleting') : t('projects.deleteProject')}
                         </button>
                     </div>
                 </div>
             )}
 
-            <Modal isOpen={isAddMemberModalOpen} onClose={() => setIsAddMemberModalOpen(false)} title="Add Project Member">
+            <Modal isOpen={isAddMemberModalOpen} onClose={() => setIsAddMemberModalOpen(false)} title={t('projects.addMemberTitle')}>
                 {addMemberError && <Alert type="error" message={addMemberError} className="mb-4" />}
                 <form onSubmit={handleAddMember} className="space-y-4">
                     <div>
                         <label htmlFor="userId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            User ID
+                            {t('projects.userId')}
                         </label>
                         <input
                             type="number"
@@ -257,13 +264,13 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
                             value={newMemberId}
                             onChange={(e) => setNewMemberId(e.target.value)}
                             className="mt-1 block w-full h-12 rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm"
-                            placeholder="Enter User ID"
+                            placeholder={t('projects.enterUserId')}
                             required
                         />
                     </div>
                     <div>
                         <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Role
+                            {t('projects.role')}
                         </label>
                         <select
                             id="role"
@@ -271,8 +278,8 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
                             onChange={(e) => setNewMemberRole(e.target.value as 'admin' | 'member')}
                             className="mt-1 block w-full h-12 rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm"
                         >
-                            <option value="member">Member</option>
-                            <option value="admin">Admin</option>
+                            <option value="member">{t('projects.member')}</option>
+                            <option value="admin">{t('projects.admin')}</option>
                         </select>
                     </div>
                     <div className="flex justify-end gap-3 mt-6">
@@ -281,17 +288,44 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
                             onClick={() => setIsAddMemberModalOpen(false)}
                             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
                         >
-                            Cancel
+                            {t('common.cancel')}
                         </button>
                         <button
                             type="submit"
                             disabled={isAddingMember}
                             className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700"
                         >
-                            {isAddingMember ? 'Adding...' : 'Add Member'}
+                            {isAddingMember ? t('projects.adding') : t('projects.addMember')}
                         </button>
                     </div>
                 </form>
+            </Modal>
+
+            <Modal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                title={t('projects.deleteProject')}
+            >
+                <div className="space-y-4">
+                    <p className="text-gray-600 dark:text-gray-300">
+                        {t('projects.deleteConfirm')}
+                    </p>
+                    <div className="flex justify-end gap-3">
+                        <button
+                            onClick={() => setIsDeleteModalOpen(false)}
+                            className="btn-secondary"
+                        >
+                            {t('common.cancel')}
+                        </button>
+                        <button
+                            onClick={confirmDeleteProject}
+                            className="btn-danger"
+                            disabled={isDeletingProject}
+                        >
+                            {isDeletingProject ? t('projects.deleting') : t('projects.deleteProject')}
+                        </button>
+                    </div>
+                </div>
             </Modal>
         </div>
     );

@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import React, { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 interface ModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ const Modal: React.FC<ModalProps> = ({
   children,
   size = "md",
 }) => {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   const sizes = {
@@ -36,6 +38,7 @@ const Modal: React.FC<ModalProps> = ({
           <button
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
+            aria-label={t('common.close')}
           >
             <X className="w-5 h-5" />
           </button>

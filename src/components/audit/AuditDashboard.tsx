@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import {
     Bar,
     BarChart,
     CartesianGrid,
     Cell,
+    Legend,
     Pie,
     PieChart,
     ResponsiveContainer,
@@ -17,7 +19,7 @@ import { RootState } from '../../store';
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
 const AuditDashboard: React.FC = () => {
-  const [page, setPage] = useState(0);
+  const { t } = useTranslation();
   const [tablePage, setTablePage] = useState(0);
   const [autoRefreshInterval, setAutoRefreshInterval] = useState<number>(0); // 0 = off
   const limit = 100; // Fetch for stats
@@ -25,7 +27,7 @@ const AuditDashboard: React.FC = () => {
   
   const { data, isLoading, error, refetch } = useGetLogsQuery({ 
     limit, 
-    offset: page * limit 
+    offset: 0 
   });
   
   // Auto-refresh logic
@@ -100,7 +102,7 @@ const AuditDashboard: React.FC = () => {
     // Top Users
     const userCounts: Record<string, number> = {};
     logs.forEach((l: any) => {
-      const user = l.user_id ? l.user_id.slice(0, 8) : 'System';
+      const user = l.user_id ? l.user_id.slice(0, 8) : t('audit.system');
       userCounts[user] = (userCounts[user] || 0) + 1;
     });
     const userData = Object.entries(userCounts)
@@ -111,7 +113,7 @@ const AuditDashboard: React.FC = () => {
     // Resource Distribution
     const resourceCounts: Record<string, number> = {};
     logs.forEach((l: any) => {
-      const type = l.resource_type || 'Unknown';
+      const type = l.resource_type || t('audit.unknown');
       resourceCounts[type] = (resourceCounts[type] || 0) + 1;
     });
     const resourceData = Object.entries(resourceCounts)
@@ -121,7 +123,7 @@ const AuditDashboard: React.FC = () => {
     // Top IPs
     const ipCounts: Record<string, number> = {};
     logs.forEach((l: any) => {
-      const ip = l.ip_address || 'Unknown';
+      const ip = l.ip_address || t('audit.unknown');
       ipCounts[ip] = (ipCounts[ip] || 0) + 1;
     });
     const ipData = Object.entries(ipCounts)
@@ -136,10 +138,10 @@ const AuditDashboard: React.FC = () => {
       .slice(0, 5);
 
     return { total, success, failure, authData, dataData, projectData, adminData, timelineData, userData, resourceData, ipData, recentFailures };
-  }, [data]);
+  }, [data, t]);
 
-  if (isLoading) return <div className="p-4">Loading audit logs...</div>;
-  if (error) return <div className="p-4 text-red-500">Failed to fetch audit logs</div>;
+  if (isLoading) return <div className="p-4">{t('audit.loading')}</div>;
+  if (error) return <div className="p-4 text-red-500">{t('audit.loadError')}</div>;
 
   const logs = data?.logs || [];
 
@@ -147,20 +149,20 @@ const AuditDashboard: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-            <h1 className="text-2xl font-bold">{user?.role === 'admin' ? 'Audit Dashboard' : 'My Activity'}</h1>
+            <h1 className="text-2xl font-bold">{user?.role === 'admin' ? t('audit.dashboardTitle') : t('audit.myActivity')}</h1>
             <div className="text-sm text-gray-600">
-            Viewing as: {user?.email} ({user?.role})
+            {t('audit.viewingAs')}: {user?.email} ({user?.role})
             </div>
         </div>
         <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">Auto-refresh:</span>
+                <span className="text-sm text-gray-600">{t('audit.autoRefresh')}:</span>
                 <select 
                     className="border rounded p-1 text-sm bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     value={autoRefreshInterval}
                     onChange={(e) => setAutoRefreshInterval(Number(e.target.value))}
                 >
-                    <option value={0}>Off</option>
+                    <option value={0}>{t('audit.off')}</option>
                     <option value={5000}>5s</option>
                     <option value={10000}>10s</option>
                     <option value={30000}>30s</option>
@@ -174,7 +176,7 @@ const AuditDashboard: React.FC = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                Refresh
+                {t('audit.refresh')}
             </button>
         </div>
       </div>
@@ -183,17 +185,17 @@ const AuditDashboard: React.FC = () => {
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border-l-4 border-blue-500">
-            <h3 className="text-gray-500 dark:text-gray-400 text-sm">Total Events</h3>
+            <h3 className="text-gray-500 dark:text-gray-400 text-sm">{t('audit.totalEvents')}</h3>
             <p className="text-2xl font-bold dark:text-white">{stats.total}</p>
           </div>
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border-l-4 border-green-500">
-            <h3 className="text-gray-500 dark:text-gray-400 text-sm">Success Rate</h3>
+            <h3 className="text-gray-500 dark:text-gray-400 text-sm">{t('audit.successRate')}</h3>
             <p className="text-2xl font-bold dark:text-white">
               {stats.total > 0 ? Math.round((stats.success / stats.total) * 100) : 0}%
             </p>
           </div>
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border-l-4 border-red-500">
-            <h3 className="text-gray-500 dark:text-gray-400 text-sm">Failures</h3>
+            <h3 className="text-gray-500 dark:text-gray-400 text-sm">{t('audit.failures')}</h3>
             <p className="text-2xl font-bold dark:text-white">{stats.failure}</p>
           </div>
         </div>
@@ -204,7 +206,7 @@ const AuditDashboard: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Activity Timeline */}
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4 dark:text-white">Activity Timeline (Hourly)</h3>
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">{t('audit.activityTimeline')}</h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.timelineData}>
@@ -215,7 +217,7 @@ const AuditDashboard: React.FC = () => {
                     contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F3F4F6' }}
                     itemStyle={{ color: '#F3F4F6' }}
                   />
-                  <Bar dataKey="value" fill="#8884d8" name="Events" />
+                  <Bar dataKey="value" fill="#8884d8" name={t('audit.events')} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -223,7 +225,7 @@ const AuditDashboard: React.FC = () => {
 
           {/* Authentication Actions */}
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4 dark:text-white">Authentication Actions</h3>
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">{t('audit.authActions')}</h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.authData}>
@@ -234,7 +236,7 @@ const AuditDashboard: React.FC = () => {
                     contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F3F4F6' }}
                     itemStyle={{ color: '#F3F4F6' }}
                   />
-                  <Bar dataKey="value" fill="#0088FE" name="Count" />
+                  <Bar dataKey="value" fill="#0088FE" name={t('audit.count')} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -242,7 +244,7 @@ const AuditDashboard: React.FC = () => {
 
           {/* Data Operations */}
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4 dark:text-white">Data Operations</h3>
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">{t('audit.dataOperations')}</h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.dataData}>
@@ -253,7 +255,7 @@ const AuditDashboard: React.FC = () => {
                     contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F3F4F6' }}
                     itemStyle={{ color: '#F3F4F6' }}
                   />
-                  <Bar dataKey="value" fill="#00C49F" name="Count" />
+                  <Bar dataKey="value" fill="#00C49F" name={t('audit.count')} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -265,7 +267,7 @@ const AuditDashboard: React.FC = () => {
       {stats && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4 dark:text-white">Project Management</h3>
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">{t('audit.projectManagement')}</h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.projectData}>
@@ -276,14 +278,14 @@ const AuditDashboard: React.FC = () => {
                     contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F3F4F6' }}
                     itemStyle={{ color: '#F3F4F6' }}
                   />
-                  <Bar dataKey="value" fill="#FFBB28" name="Count" />
+                  <Bar dataKey="value" fill="#FFBB28" name={t('audit.count')} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4 dark:text-white">Administrative Actions</h3>
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">{t('audit.adminActions')}</h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.adminData}>
@@ -294,7 +296,7 @@ const AuditDashboard: React.FC = () => {
                     contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F3F4F6' }}
                     itemStyle={{ color: '#F3F4F6' }}
                   />
-                  <Bar dataKey="value" fill="#FF8042" name="Count" />
+                  <Bar dataKey="value" fill="#FF8042" name={t('audit.count')} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -307,7 +309,7 @@ const AuditDashboard: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Resource Distribution */}
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4 dark:text-white">Resource Types</h3>
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">{t('audit.resourceTypes')}</h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -325,6 +327,7 @@ const AuditDashboard: React.FC = () => {
                     ))}
                   </Pie>
                   <Tooltip />
+                  <Legend />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -333,7 +336,7 @@ const AuditDashboard: React.FC = () => {
           {/* Top Users - Admin Only */}
           {user?.role === 'admin' && (
             <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-              <h3 className="text-lg font-semibold mb-4 dark:text-white">Top Users</h3>
+              <h3 className="text-lg font-semibold mb-4 dark:text-white">{t('audit.topUsers')}</h3>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={stats.userData} layout="vertical">
@@ -344,7 +347,7 @@ const AuditDashboard: React.FC = () => {
                       contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F3F4F6' }}
                       itemStyle={{ color: '#F3F4F6' }}
                     />
-                    <Bar dataKey="value" fill="#82ca9d" name="Events" />
+                    <Bar dataKey="value" fill="#82ca9d" name={t('audit.events')} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -354,13 +357,13 @@ const AuditDashboard: React.FC = () => {
           {/* Top IPs - Admin Only */}
           {user?.role === 'admin' && (
             <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-              <h3 className="text-lg font-semibold mb-4 dark:text-white">Top IPs</h3>
+              <h3 className="text-lg font-semibold mb-4 dark:text-white">{t('audit.topIPs')}</h3>
               <div className="h-64 overflow-auto">
                 <table className="min-w-full text-sm">
                   <thead>
                     <tr className="bg-gray-50 dark:bg-gray-700">
                       <th className="px-4 py-2 text-left dark:text-gray-300">IP</th>
-                      <th className="px-4 py-2 text-right dark:text-gray-300">Count</th>
+                      <th className="px-4 py-2 text-right dark:text-gray-300">{t('audit.count')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -381,13 +384,13 @@ const AuditDashboard: React.FC = () => {
       {/* Recent Failures */}
       {stats && stats.recentFailures.length > 0 && (
         <div className="bg-red-50 dark:bg-red-900/10 p-4 rounded-lg shadow border border-red-200 dark:border-red-900/30">
-          <h3 className="text-lg font-semibold text-red-800 dark:text-red-400 mb-2">Recent Failures</h3>
+          <h3 className="text-lg font-semibold text-red-800 dark:text-red-400 mb-2">{t('audit.recentFailures')}</h3>
           <div className="space-y-2">
             {stats.recentFailures.map((log: any) => (
               <div key={log.id} className="flex justify-between items-center bg-white dark:bg-gray-800 p-2 rounded border border-red-100 dark:border-red-900/20">
                 <div>
                   <span className="font-medium text-red-600 dark:text-red-400">{log.action}</span>
-                  <span className="text-gray-500 dark:text-gray-400 text-sm ml-2">by {log.user_id ? log.user_id.slice(0, 8) : 'System'}</span>
+                  <span className="text-gray-500 dark:text-gray-400 text-sm ml-2">by {log.user_id ? log.user_id.slice(0, 8) : t('audit.system')}</span>
                   <p className="text-xs text-gray-600 dark:text-gray-400">{log.details}</p>
                 </div>
                 <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(log.created_at).toLocaleTimeString()}</span>
@@ -400,31 +403,31 @@ const AuditDashboard: React.FC = () => {
       {/* Logs Table */}
       <div className="overflow-x-auto bg-white dark:bg-gray-800 shadow-md rounded-lg">
         <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center">
-          <h3 className="text-lg font-semibold dark:text-white">Detailed Logs</h3>
+          <h3 className="text-lg font-semibold dark:text-white">{t('audit.detailedLogs')}</h3>
           <span className="text-sm text-gray-500 dark:text-gray-400">
-            Showing {tablePage * logsPerTablePage + 1}-{Math.min((tablePage + 1) * logsPerTablePage, logs.length)} of {logs.length}
+            {t('audit.showing')} {tablePage * logsPerTablePage + 1}-{Math.min((tablePage + 1) * logsPerTablePage, logs.length)} {t('audit.of')} {logs.length}
           </span>
         </div>
         <table className="min-w-full leading-normal">
           <thead>
             <tr>
               <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                Time
+                {t('audit.time')}
               </th>
               <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                Action
+                {t('audit.action')}
               </th>
               <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                Status
+                {t('audit.status')}
               </th>
               <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                Resource
+                {t('audit.resource')}
               </th>
               <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                User
+                {t('audit.user')}
               </th>
               <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                Details
+                {t('audit.details')}
               </th>
             </tr>
           </thead>
@@ -452,7 +455,7 @@ const AuditDashboard: React.FC = () => {
                   {log.resource_type} {log.resource_id ? `(${log.resource_id.slice(0, 8)}...)` : ''}
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-gray-300">
-                  {log.user_id ? log.user_id.slice(0, 8) : 'System'}
+                  {log.user_id ? log.user_id.slice(0, 8) : t('audit.system')}
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-gray-300">
                   {log.details}
@@ -462,7 +465,7 @@ const AuditDashboard: React.FC = () => {
             {logs.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-center dark:text-gray-400">
-                  No logs found
+                  {t('audit.noLogs')}
                 </td>
               </tr>
             )}
@@ -476,17 +479,17 @@ const AuditDashboard: React.FC = () => {
             disabled={tablePage === 0}
             className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded disabled:opacity-50 dark:text-white text-sm"
           >
-            Previous
+            {t('audit.previous')}
           </button>
           <span className="text-sm dark:text-white">
-            Page {tablePage + 1} of {Math.ceil(logs.length / logsPerTablePage)}
+            {t('audit.page')} {tablePage + 1} {t('audit.of')} {Math.ceil(logs.length / logsPerTablePage)}
           </span>
           <button 
             onClick={() => setTablePage(p => p + 1)}
             disabled={(tablePage + 1) * logsPerTablePage >= logs.length}
             className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded disabled:opacity-50 dark:text-white text-sm"
           >
-            Next
+            {t('audit.next')}
           </button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCreateDataMutation } from "../../services/dataApi";
 import { useListProjectsQuery } from "../../services/projectsApi";
@@ -26,46 +27,8 @@ interface DataTypeOption {
   icon: string;
 }
 
-const DATA_TYPES: DataTypeOption[] = [
-  {
-    value: "text",
-    label: "Text",
-    description: "Key-value pairs",
-    icon: "📝",
-  },
-  {
-    value: "kubernetes",
-    label: "Kubernetes Secret",
-    description: "Configuration secrets for K8s deployments",
-    icon: "☸️",
-  },
-  {
-    value: "credentials",
-    label: "Credentials",
-    description: "Username and password",
-    icon: "🔑",
-  },
-  {
-    value: "api_key",
-    label: "API Key",
-    description: "API key with optional headers",
-    icon: "🔌",
-  },
-  {
-    value: "ssh_key",
-    label: "SSH Key",
-    description: "SSH private/public key pair",
-    icon: "🔐",
-  },
-  {
-    value: "certificate",
-    label: "Certificate",
-    description: "SSL/TLS certificate and key",
-    icon: "📜",
-  },
-];
-
 export const CreateDataPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialProjectId = searchParams.get("projectId");
@@ -77,13 +40,52 @@ export const CreateDataPage: React.FC = () => {
   const [selectedType, setSelectedType] = useState<DataType | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const DATA_TYPES: DataTypeOption[] = [
+    {
+      value: "text",
+      label: t('types.text'),
+      description: t('types.textDesc'),
+      icon: "📝",
+    },
+    {
+      value: "kubernetes",
+      label: t('types.kubernetes'),
+      description: t('types.kubernetesDesc'),
+      icon: "☸️",
+    },
+    {
+      value: "credentials",
+      label: t('types.credentials'),
+      description: t('types.credentialsDesc'),
+      icon: "🔑",
+    },
+    {
+      value: "api_key",
+      label: t('types.apiKey'),
+      description: t('types.apiKeyDesc'),
+      icon: "🔌",
+    },
+    {
+      value: "ssh_key",
+      label: t('types.sshKey'),
+      description: t('types.sshKeyDesc'),
+      icon: "🔐",
+    },
+    {
+      value: "certificate",
+      label: t('types.certificate'),
+      description: t('types.certificateDesc'),
+      icon: "📜",
+    },
+  ];
+
   const typeToLabel = useMemo(
     () =>
       DATA_TYPES.reduce<Record<DataType, string>>((acc, item) => {
         acc[item.value] = item.label;
         return acc;
       }, {} as Record<DataType, string>),
-    []
+    [DATA_TYPES]
   );
 
   const handleSubmit = async (data: any) => {
@@ -95,7 +97,7 @@ export const CreateDataPage: React.FC = () => {
     } catch (err: any) {
       console.error("Failed to create data", err);
       setError(
-        err?.data?.detail || "Failed to create secret. Please try again."
+        err?.data?.detail || t('secrets.createError')
       );
     }
   };
@@ -203,7 +205,7 @@ export const CreateDataPage: React.FC = () => {
     <div className="max-w-4xl mx-auto">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 dark:border dark:border-gray-700">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
-          Create New Secret
+          {t('secrets.createTitle')}
         </h1>
 
         {error && (
@@ -218,14 +220,14 @@ export const CreateDataPage: React.FC = () => {
 
         <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Assign to Project
+                {t('secrets.assignProject')}
             </label>
             <select
                 value={selectedProjectId}
                 onChange={(e) => setSelectedProjectId(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
             >
-                <option value="">Personal</option>
+                <option value="">{t('secrets.personalOption')}</option>
                 {projects?.map((project) => (
                     <option key={project.id} value={project.id}>
                         {project.name}
@@ -237,7 +239,7 @@ export const CreateDataPage: React.FC = () => {
         {!selectedType ? (
           <div>
             <p className="text-gray-600 dark:text-gray-300 mb-6">
-              Select the type of secret you want to create:
+              {t('secrets.selectType')}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {DATA_TYPES.map((type) => (
@@ -262,7 +264,7 @@ export const CreateDataPage: React.FC = () => {
               onClick={() => navigate("/dashboard/data")}
               className="mt-6 px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
             >
-              ← Back to Secrets
+              ← {t('secrets.back')}
             </button>
           </div>
         ) : (
@@ -272,11 +274,11 @@ export const CreateDataPage: React.FC = () => {
                 onClick={() => setSelectedType(null)}
                 className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
               >
-                ← Change Type
+                ← {t('secrets.changeType')}
               </button>
               <span className="text-gray-400 dark:text-gray-500">|</span>
               <span className="text-gray-600 dark:text-gray-300">
-                Creating:{" "}
+                {t('secrets.creating')}{" "}
                 <strong>{selectedType ? typeToLabel[selectedType] : ""}</strong>
               </span>
             </div>

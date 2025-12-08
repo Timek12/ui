@@ -1,5 +1,6 @@
 import { ChevronRight, Folder, Pencil, Plus } from 'lucide-react';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useListProjectsQuery } from '../../services/projectsApi';
 import { Project } from '../../types/projects';
 import Alert from '../common/Alert';
@@ -9,13 +10,14 @@ import { EditProjectModal } from './EditProjectModal';
 import { ProjectDetails } from './ProjectDetails';
 
 export const ProjectList: React.FC = () => {
+    const { t } = useTranslation();
     const { data: projects, isLoading, error } = useListProjectsQuery();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [editingProject, setEditingProject] = useState<Project | null>(null);
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
     if (isLoading) return <LoadingSpinner />;
-    if (error) return <Alert type="error" message="Failed to load projects" />;
+    if (error) return <Alert type="error" message={t('projects.loadError')} />;
 
     if (selectedProjectId) {
         return (
@@ -24,7 +26,7 @@ export const ProjectList: React.FC = () => {
                     onClick={() => setSelectedProjectId(null)}
                     className="mb-4 text-primary-600 hover:text-primary-700 flex items-center gap-1"
                 >
-                    &larr; Back to Projects
+                    &larr; {t('projects.back')}
                 </button>
                 <ProjectDetails projectId={selectedProjectId} />
             </div>
@@ -34,13 +36,13 @@ export const ProjectList: React.FC = () => {
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Projects</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('projects.title')}</h2>
                 <button
                     onClick={() => setIsCreateModalOpen(true)}
                     className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
                 >
                     <Plus className="w-4 h-4" />
-                    Create Project
+                    {t('projects.create')}
                 </button>
             </div>
 
@@ -58,7 +60,7 @@ export const ProjectList: React.FC = () => {
                                     setEditingProject(project);
                                 }}
                                 className="p-2 text-gray-400 hover:text-primary-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                                title="Edit Project"
+                                title={t('projects.edit')}
                             >
                                 <Pencil className="w-4 h-4" />
                             </button>
@@ -72,7 +74,7 @@ export const ProjectList: React.FC = () => {
                         </div>
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 pr-8">{project.name}</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Created {new Date(project.created_at).toLocaleDateString()}
+                            {t('projects.created')} {new Date(project.created_at).toLocaleDateString()}
                         </p>
                     </div>
                 ))}
@@ -80,8 +82,8 @@ export const ProjectList: React.FC = () => {
                 {projects?.length === 0 && (
                     <div className="col-span-full text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
                         <Folder className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No projects yet</h3>
-                        <p className="text-gray-500 dark:text-gray-400">Create a project to start sharing secrets.</p>
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{t('projects.noProjects')}</h3>
+                        <p className="text-gray-500 dark:text-gray-400">{t('projects.createFirst')}</p>
                     </div>
                 )}
             </div>

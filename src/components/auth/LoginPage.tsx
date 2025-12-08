@@ -1,13 +1,16 @@
 import { Shield } from "lucide-react";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { useLoginMutation } from "../../services/authApi";
 import { setCredentials } from "../../store/authSlice";
 import Alert from "../common/Alert";
+import LanguageSwitcher from "../common/LanguageSwitcher";
 import LoadingSpinner from "../common/LoadingSpinner";
 
 const LoginPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [login, { isLoading }] = useLoginMutation();
@@ -31,7 +34,7 @@ const LoginPage: React.FC = () => {
       );
       navigate("/dashboard");
     } catch (err: any) {
-      setError(err?.data?.detail || "Login failed. Please try again.");
+      setError(err?.data?.detail || t('common.error'));
     }
   };
 
@@ -43,13 +46,17 @@ const LoginPage: React.FC = () => {
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/20 blur-[100px]" />
       </div>
 
+      <div className="absolute top-4 right-4 z-20">
+        <LanguageSwitcher className="text-white hover:bg-white/10" />
+      </div>
+
       <div className="w-full max-w-md p-8 rounded-2xl shadow-2xl border border-white/10 bg-white/5 backdrop-blur-xl z-10 relative">
         <div className="flex flex-col items-center mb-8">
           <div className="bg-gradient-to-tr from-emerald-500 to-blue-500 p-4 rounded-2xl shadow-lg mb-4 transform hover:scale-105 transition-transform duration-300">
             <Shield className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-white tracking-tight">Welcome Back</h1>
-          <p className="text-gray-400 mt-2 text-lg">Sign in to continue to Luna</p>
+          <h1 className="text-4xl font-bold text-white tracking-tight">{t('auth.loginTitle')}</h1>
+          <p className="text-gray-400 mt-2 text-lg">{t('auth.loginSubtitle')}</p>
         </div>
 
         {error && (
@@ -65,7 +72,7 @@ const LoginPage: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium text-gray-300 ml-1">
-              Email Address
+              {t('auth.email')}
             </label>
             <input
               id="email"
@@ -80,12 +87,6 @@ const LoginPage: React.FC = () => {
           </div>
 
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-                <label htmlFor="password" className="text-sm font-medium text-gray-300 ml-1">
-                Password
-                </label>
-                <a href="#" className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">Forgot password?</a>
-            </div>
             <input
               id="password"
               type="password"
@@ -103,18 +104,18 @@ const LoginPage: React.FC = () => {
             disabled={isLoading}
             className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/30 transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
-            {isLoading ? <LoadingSpinner size="sm" /> : "Sign In"}
+            {isLoading ? <LoadingSpinner size="sm" /> : t('auth.loginButton')}
           </button>
         </form>
 
         <div className="mt-8 text-center">
           <p className="text-gray-400">
-            Don't have an account?{" "}
+            {t('auth.noAccount')}{" "}
             <Link
               to="/register"
               className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors"
             >
-              Create account
+              {t('auth.register')}
             </Link>
           </p>
         </div>

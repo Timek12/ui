@@ -1,5 +1,6 @@
 import { Plus, X } from "lucide-react";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface TextDataFormProps {
   onSubmit: (data: any) => void;
@@ -18,6 +19,7 @@ export const TextDataForm: React.FC<TextDataFormProps> = ({
   isEditing = false,
   initialData,
 }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState(initialData?.name || "");
   const [description, setDescription] = useState(
     initialData?.description || ""
@@ -76,7 +78,7 @@ export const TextDataForm: React.FC<TextDataFormProps> = ({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Secret Name *
+          {t('forms.secretName')}
         </label>
         <input
           type="text"
@@ -90,21 +92,21 @@ export const TextDataForm: React.FC<TextDataFormProps> = ({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Description
+          {t('forms.description')}
         </label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={2}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          placeholder="Optional description"
+          placeholder={t('forms.optionalDescription')}
         />
       </div>
 
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="block text-sm font-medium text-gray-700">
-            Key-Value Pairs *
+            {t('forms.keyValuePairs')}
           </label>
           <button
             type="button"
@@ -112,7 +114,7 @@ export const TextDataForm: React.FC<TextDataFormProps> = ({
             className="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700"
           >
             <Plus className="w-4 h-4" />
-            Add Field
+            {t('forms.addField')}
           </button>
         </div>
 
@@ -123,7 +125,7 @@ export const TextDataForm: React.FC<TextDataFormProps> = ({
                 type="text"
                 value={field.key}
                 onChange={(e) => updateField(index, "key", e.target.value)}
-                placeholder="Key"
+                placeholder={t('forms.key')}
                 required
                 className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
@@ -131,7 +133,7 @@ export const TextDataForm: React.FC<TextDataFormProps> = ({
                 type="text"
                 value={field.value}
                 onChange={(e) => updateField(index, "value", e.target.value)}
-                placeholder="Value"
+                placeholder={t('forms.value')}
                 required
                 className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
@@ -154,14 +156,14 @@ export const TextDataForm: React.FC<TextDataFormProps> = ({
           type="submit"
           className="flex-1 bg-primary-600 dark:bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors"
         >
-          {isEditing ? "Update Secret" : "Create Secret"}
+          {isEditing ? t('forms.update') : t('forms.create')}
         </button>
         <button
           type="button"
           onClick={onCancel}
           className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
         >
-          Cancel
+          {t('forms.cancel')}
         </button>
       </div>
     </form>

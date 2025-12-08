@@ -1,5 +1,6 @@
 import { Plus, X } from "lucide-react";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface KubernetesFormProps {
   onSubmit: (data: any) => void;
@@ -19,6 +20,7 @@ export const KubernetesForm: React.FC<KubernetesFormProps> = ({
   isEditing = false,
   initialData,
 }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState(initialData?.name || "");
   const [description, setDescription] = useState(
     initialData?.description || ""
@@ -81,7 +83,7 @@ export const KubernetesForm: React.FC<KubernetesFormProps> = ({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Secret Name *
+          {t('forms.secretName')}
         </label>
         <input
           type="text"
@@ -95,7 +97,7 @@ export const KubernetesForm: React.FC<KubernetesFormProps> = ({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Description
+          {t('forms.description')}
         </label>
         <textarea
           value={description}
@@ -107,7 +109,7 @@ export const KubernetesForm: React.FC<KubernetesFormProps> = ({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Namespace
+          {t('forms.namespace')}
         </label>
         <input
           type="text"
@@ -121,7 +123,7 @@ export const KubernetesForm: React.FC<KubernetesFormProps> = ({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Data (Key-Value Pairs) *
+          {t('forms.keyValuePairs')}
         </label>
         <div className="space-y-2">
           {data.map((field, index) => (
@@ -130,7 +132,7 @@ export const KubernetesForm: React.FC<KubernetesFormProps> = ({
                 type="text"
                 value={field.key}
                 onChange={(e) => updateDataField(index, "key", e.target.value)}
-                placeholder="Key"
+                placeholder={t('forms.key')}
                 className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500"
               />
               <input
@@ -139,7 +141,7 @@ export const KubernetesForm: React.FC<KubernetesFormProps> = ({
                 onChange={(e) =>
                   updateDataField(index, "value", e.target.value)
                 }
-                placeholder="Value"
+                placeholder={t('forms.value')}
                 className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500"
               />
               {data.length > 1 && (
@@ -159,7 +161,7 @@ export const KubernetesForm: React.FC<KubernetesFormProps> = ({
             className="flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:text-primary-700 text-sm"
           >
             <Plus size={16} />
-            Add Field
+            {t('forms.addField')}
           </button>
         </div>
       </div>
@@ -169,14 +171,14 @@ export const KubernetesForm: React.FC<KubernetesFormProps> = ({
           type="submit"
           className="flex-1 bg-primary-600 dark:bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
         >
-          {isEditing ? "Update Secret" : "Create Secret"}
+          {isEditing ? t('forms.update') : t('forms.create')}
         </button>
         <button
           type="button"
           onClick={onCancel}
           className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300"
         >
-          Cancel
+          {t('forms.cancel')}
         </button>
       </div>
     </form>

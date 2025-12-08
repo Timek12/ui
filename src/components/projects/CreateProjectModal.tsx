@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCreateProjectMutation } from '../../services/projectsApi';
 import Alert from '../common/Alert';
 import Modal from '../common/Modal';
@@ -9,6 +10,7 @@ interface CreateProjectModalProps {
 }
 
 export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ isOpen, onClose }) => {
+    const { t } = useTranslation();
     const [name, setName] = useState('');
     const [createProject, { isLoading, error }] = useCreateProjectMutation();
 
@@ -24,7 +26,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ isOpen, 
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Create New Project">
+        <Modal isOpen={isOpen} onClose={onClose} title={t('projects.createTitle')}>
             <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
                     <Alert 
@@ -32,14 +34,14 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ isOpen, 
                         message={
                             'data' in (error as any) 
                                 ? (error as any).data.detail 
-                                : 'Failed to create project'
+                                : t('projects.createError')
                         } 
                     />
                 )}
                 
                 <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Project Name
+                        {t('projects.name')}
                     </label>
                     <input
                         type="text"
@@ -58,14 +60,14 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ isOpen, 
                         onClick={onClose}
                         className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600"
                     >
-                        Cancel
+                        {t('common.cancel')}
                     </button>
                     <button
                         type="submit"
                         disabled={isLoading}
                         className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isLoading ? 'Creating...' : 'Create Project'}
+                        {isLoading ? t('projects.creating') : t('projects.create')}
                     </button>
                 </div>
             </form>
