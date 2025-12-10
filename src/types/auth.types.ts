@@ -6,11 +6,6 @@ export interface UserPublic {
   role: "user" | "admin";
 }
 
-export interface UserResponse extends UserPublic {
-  created_at: string;
-  updated_at: string;
-}
-
 export interface UserCreate {
   email: string;
   name?: string;
@@ -39,20 +34,7 @@ export interface RefreshTokenRequest {
   refresh_token: string;
 }
 
-
-
 // Response Types
 export interface MessageResponse {
   message: string;
 }
-
-
-
-export interface TokenVerificationResponse {
-  valid: boolean;
-  user_id?: string;
-  email?: string;
-  expires_at?: number;
-}
-
-

@@ -27,7 +27,6 @@ export interface DataCreateRequest {
 
   // API Key
   apiKey?: string;
-  headers?: Array<{ key: string; value: string }>;
 
   // SSH Key
   privateKey?: string;

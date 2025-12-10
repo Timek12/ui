@@ -217,15 +217,6 @@
       "enterUserId": "Wprowadź ID użytkownika",
       "addMemberTitle": "Dodaj członka projektu"
     },
-    "debug": {
-      "title": "Logi debugowania",
-      "clear": "Wyczyść logi",
-      "logoutReason": "Powód wylogowania",
-      "lastApiError": "Ostatni błąd API",
-      "adminRedirect": "Przekierowanie trasy administratora",
-      "adminHistory": "Historia debugowania trasy administratora (Ostatnie 10 sprawdzeń)",
-      "authState": "Obecny stan autoryzacji (localStorage)"
-    },
     "secrets": {
       "title": "Sekrety",
       "subtitle": "Zarządzaj swoimi zaszyfrowanymi sekretami",

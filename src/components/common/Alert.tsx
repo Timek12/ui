@@ -9,13 +9,22 @@ interface AlertProps {
   className?: string;
 }
 
+// Map backend error messages to translation keys
+const ERROR_MESSAGE_MAP: Record<string, string> = {
+  "Vault is sealed. Please unseal the vault first.": "vault.sealedError",
+  "Vault is sealed. Cannot update data value.": "vault.sealedError",
+  "No master key available. Vault may need to be unsealed.": "vault.sealedError",
+  "No master key available.": "vault.sealedError",
+};
+
 const Alert: React.FC<AlertProps> = ({ type, message, onClose, className = "" }) => {
   const { t } = useTranslation();
+  
   const styles = {
-    success: "bg-green-50 border-green-500 text-green-800",
-    error: "bg-red-50 border-red-500 text-red-800",
-    warning: "bg-yellow-50 border-yellow-500 text-yellow-800",
-    info: "bg-blue-50 border-blue-500 text-blue-800",
+    success: "bg-green-50 border-green-500 text-green-800 dark:bg-green-900/20 dark:border-green-600 dark:text-green-300",
+    error: "bg-red-50 border-red-500 text-red-800 dark:bg-red-900/20 dark:border-red-600 dark:text-red-300",
+    warning: "bg-yellow-50 border-yellow-500 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-600 dark:text-yellow-300",
+    info: "bg-blue-50 border-blue-500 text-blue-800 dark:bg-blue-900/20 dark:border-blue-600 dark:text-blue-300",
   };
 
   const icons = {
@@ -27,11 +36,9 @@ const Alert: React.FC<AlertProps> = ({ type, message, onClose, className = "" })
 
   const Icon = icons[type];
 
-  // Intercept backend error messages and translate them
-  let displayMessage = message;
-  if (message === "Vault is sealed. Please unseal the vault first.") {
-    displayMessage = t('vault.sealedError');
-  }
+  // Translate backend error messages
+  const translationKey = ERROR_MESSAGE_MAP[message];
+  const displayMessage = translationKey ? t(translationKey) : message;
 
   return (
     <div

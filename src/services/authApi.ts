@@ -33,7 +33,7 @@ export const authApi = api.injectEndpoints({
       invalidatesTags: ["User"],
     }),
 
-    // Refresh access token
+    // Refresh access token (used internally by baseQueryWithReauth)
     refreshToken: builder.mutation<TokenPair, RefreshTokenRequest>({
       query: (request) => ({
         url: "/auth/refresh",
@@ -57,22 +57,11 @@ export const authApi = api.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
-
-    // Verify token
-    verifyToken: builder.query<
-      { valid: boolean; user_id: string; email: string; expires_at: number },
-      void
-    >({
-      query: () => "/auth/verify",
-    }),
   }),
 });
 
 export const {
   useRegisterMutation,
   useLoginMutation,
-  useRefreshTokenMutation,
-  useGetCurrentUserQuery,
   useLogoutMutation,
-  useVerifyTokenQuery,
 } = authApi;

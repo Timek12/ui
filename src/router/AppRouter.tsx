@@ -6,7 +6,6 @@ import AdminRoute from "../components/auth/AdminRoute";
 import LoginPage from "../components/auth/LoginPage";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import RegisterPage from "../components/auth/RegisterPage";
-import DebugLogs from "../components/common/DebugLogs";
 import DashboardHome from "../components/dashboard/DashboardHome";
 import { CreateDataPage } from "../components/data/CreateDataPage";
 import DataPage from "../components/data/DataPage";
@@ -19,7 +18,6 @@ export const AppRouter = () => {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      <Route path="/debug" element={<DebugLogs />} />
 
       <Route
         path="/dashboard"
