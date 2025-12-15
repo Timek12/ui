@@ -1,17 +1,17 @@
 import {
-    Box,
-    Check,
-    Copy,
-    Cpu,
-    Edit2,
-    FileText,
-    Folder,
-    Key,
-    Plus,
-    Shield,
-    Terminal,
-    Trash2,
-    UserCircle
+  Box,
+  Check,
+  Copy,
+  Cpu,
+  Edit2,
+  FileText,
+  Folder,
+  Key,
+  Plus,
+  Shield,
+  Terminal,
+  Trash2,
+  UserCircle
 } from "lucide-react";
 
 import { skipToken } from "@reduxjs/toolkit/query/react";
@@ -20,10 +20,10 @@ import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
-    useDeleteDataMutation,
-    useGetDataByIdQuery,
-    useGetDataQuery,
-    useUpdateDataMutation,
+  useDeleteDataMutation,
+  useGetDataByIdQuery,
+  useGetDataQuery,
+  useUpdateDataMutation,
 } from "../../services/dataApi";
 import { useListProjectsQuery } from "../../services/projectsApi";
 import type { DataListItem, DataUpdate } from "../../types/data.types";
@@ -154,7 +154,11 @@ const DataPage: React.FC = () => {
       setIsDeleteModalOpen(false);
       setDataToDelete(null);
     } catch (err: any) {
-      setError(err?.data?.detail || t('secrets.deleteError'));
+      if (err?.status === 403) {
+        setError(t('secrets.deletePermissionError'));
+      } else {
+        setError(err?.data?.detail || t('secrets.deleteError'));
+      }
       setIsDeleteModalOpen(false);
     }
   };

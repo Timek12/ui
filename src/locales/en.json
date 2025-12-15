@@ -249,7 +249,8 @@
       "id": "ID",
       "loading": "Loading secrets...",
       "loadingData": "Loading secret data...",
-      "noData": "No data available"
+      "noData": "No data available",
+      "deletePermissionError": "Only the owner or project admin can delete this secret"
     },
     "types": {
       "text": "Text",

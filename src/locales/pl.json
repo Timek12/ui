@@ -249,7 +249,8 @@
       "id": "ID",
       "loading": "Ładowanie sekretów...",
       "loadingData": "Ładowanie danych sekretu...",
-      "noData": "Brak dostępnych danych"
+      "noData": "Brak dostępnych danych",
+      "deletePermissionError": "Tylko właściciel lub administrator projektu może usunąć ten sekret"
     },
     "types": {
       "text": "Tekst",
