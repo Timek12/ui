@@ -250,7 +250,17 @@
       "loading": "Ładowanie sekretów...",
       "loadingData": "Ładowanie danych sekretu...",
       "noData": "Brak dostępnych danych",
-      "deletePermissionError": "Tylko właściciel lub administrator projektu może usunąć ten sekret"
+      "deletePermissionError": "Tylko właściciel lub administrator projektu może usunąć ten sekret",
+      "rotateConfirmTitle": "Potwierdź rotację",
+      "rotateConfirmMessage": "Czy na pewno chcesz wykonać rotację tego sekretu? Zostanie wygenerowana nowa wartość, a stara zostanie zarchiwizowana.",
+      "confirmRotate": "Tak, wykonaj rotację",
+      "rotationPolicy": "Polityka rotacji",
+      "rotateNow": "Wymień teraz",
+      "rotationInterval": "Interwał rotacji (dni)",
+      "rotationHelp": "Ustaw 0, aby wyłączyć automatyczne przypomnienia o rotacji.",
+      "nextRotation": "Następna rotacja",
+      "rotationSuccess": "Sekret został pomyślnie zrotowany!",
+      "rotationError": "Nie udało się zrotować sekretu"
     },
     "types": {
       "text": "Tekst",

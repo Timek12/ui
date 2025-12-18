@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 interface ModalProps {
@@ -18,6 +18,24 @@ const Modal: React.FC<ModalProps> = ({
   size = "md",
 }) => {
   const { t } = useTranslation();
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (isOpen && e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden"; // Prevent scrolling when modal is open
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset"; // Restore scrolling
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const sizes = {
@@ -27,8 +45,9 @@ const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
       <div
+        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking content
         className={`bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700/50 ${sizes[size]} w-full max-h-[90vh] overflow-hidden transform transition-all duration-300 scale-100`}
       >
         <div className="flex items-center justify-between p-6 border-b border-gray-200/50 dark:border-gray-700/50">

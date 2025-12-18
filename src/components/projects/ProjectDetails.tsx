@@ -1,4 +1,4 @@
-import { AlertTriangle, Check, Edit2, Key, Shield, Trash2, UserPlus, X } from 'lucide-react';
+import { AlertTriangle, Check, Copy, Edit2, Key, Shield, Trash2, UserPlus, X } from 'lucide-react';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -36,6 +36,14 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
 
     const [addMemberError, setAddMemberError] = useState<string | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [copiedId, setCopiedId] = useState<string | null>(null);
+
+    const handleCopyId = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(id);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+    };
 
     if (isLoadingProject || isLoadingMembers || isLoadingSecrets) return <LoadingSpinner />;
     if (!project) return <Alert type="error" message={t('projects.notFound')} />;
@@ -149,9 +157,25 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ projectId }) => 
                         </>
                     )}
                 </div>
-                <p className="text-gray-500 dark:text-gray-400">
-                    {t('projects.created')} {new Date(project.created_at).toLocaleDateString()}
-                </p>
+                <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-mono text-gray-500 dark:text-gray-400 select-all">
+                        ID: {project.id}
+                    </span>
+                    <button
+                        onClick={(e) => handleCopyId(e, project.id)}
+                        className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                        title={t('common.copy')}
+                    >
+                        {copiedId === project.id ? (
+                            <Check className="w-3 h-3 text-green-600 dark:text-green-400" />
+                        ) : (
+                            <Copy className="w-3 h-3" />
+                        )}
+                    </button>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 ml-4">
+                        {t('projects.created')} {new Date(project.created_at).toLocaleDateString("pl-PL")}
+                    </p>
+                </div>
             </div>
 
             {deleteError && <Alert type="error" message={deleteError} />}

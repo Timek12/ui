@@ -9,6 +9,7 @@ import {
     Moon,
     Shield,
     Sun,
+    Terminal,
     User,
     Users
 } from "lucide-react";
@@ -43,6 +44,7 @@ const DashboardLayout: React.FC = () => {
     { to: "/dashboard/data", label: t('nav.secrets'), icon: Database },
     { to: "/dashboard/projects", label: t('nav.projects'), icon: Folder },
     { to: "/dashboard/audit", label: t('nav.audit'), icon: FileText },
+    { to: "/dashboard/integrations", label: t('nav.integrations', 'Integrations'), icon: Terminal },
     { to: "/dashboard/users", label: t('nav.users'), icon: Users, adminOnly: true },
     { to: "/dashboard/vault", label: t('nav.vault'), icon: Shield, adminOnly: true },
   ];

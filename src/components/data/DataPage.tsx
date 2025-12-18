@@ -8,6 +8,7 @@ import {
   Folder,
   Key,
   Plus,
+  RefreshCw,
   Shield,
   Terminal,
   Trash2,
@@ -23,7 +24,8 @@ import {
   useDeleteDataMutation,
   useGetDataByIdQuery,
   useGetDataQuery,
-  useUpdateDataMutation,
+  useRotateDataMutation,
+  useUpdateDataMutation
 } from "../../services/dataApi";
 import { useListProjectsQuery } from "../../services/projectsApi";
 import type { DataListItem, DataUpdate } from "../../types/data.types";
@@ -45,6 +47,24 @@ const DataPage: React.FC = () => {
   const [editingData, setEditingData] = useState<DataListItem | null>(null);
   const [editingDataId, setEditingDataId] = useState<string | null>(null);
   const [editProjectId, setEditProjectId] = useState<string>("");
+  const [editRotationInterval, setEditRotationInterval] = useState<number>(0);
+
+  // Rotation Confirmation Modal State
+  const [isRotateConfirmOpen, setIsRotateConfirmOpen] = useState(false);
+
+  // Safely close modals on mount/unmount
+  useEffect(() => {
+    setIsEditModalOpen(false);
+    setIsDeleteModalOpen(false);
+    setIsRotateConfirmOpen(false);
+    // Cleanup body style if stuck
+    document.body.style.overflow = 'unset';
+    
+    return () => {
+        document.body.style.overflow = 'unset';
+    };
+  }, []);
+
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +84,7 @@ const DataPage: React.FC = () => {
 
   const [updateData] = useUpdateDataMutation();
   const [deleteData] = useDeleteDataMutation();
+  const [rotateData] = useRotateDataMutation();
   
   const { data: fullData, isLoading: isLoadingFullData, refetch } = useGetDataByIdQuery(
     editingDataId ? { id: editingDataId, projectId: selectedProjectId || undefined } : skipToken,
@@ -75,6 +96,13 @@ const DataPage: React.FC = () => {
         refetch();
     }
   }, [editingDataId, refetch]);
+  
+  // Sync rotation interval when full data loads
+  useEffect(() => {
+    if (fullData) {
+        setEditRotationInterval(fullData.rotation_interval_days || 0);
+    }
+  }, [fullData]);
 
   const getTypeBadge = (type: string) => {
     const badges: Record<string, { label: string; Icon: any; className: string }> = {
@@ -129,7 +157,8 @@ const DataPage: React.FC = () => {
   const handleEditData = (data: DataListItem) => {
     setEditingData(data);
     setEditingDataId(data.id);
-    setEditProjectId(selectedProjectId); 
+    setEditProjectId(selectedProjectId);
+    setEditRotationInterval(data.rotation_interval_days || 0);
     setIsEditModalOpen(true);
   };
 
@@ -179,6 +208,7 @@ const DataPage: React.FC = () => {
         name: formData.name,
         description: formData.description,
         project_id: editProjectId || undefined,
+        rotation_interval_days: editRotationInterval,
       };
 
       switch (editingData.data_type) {
@@ -222,7 +252,41 @@ const DataPage: React.FC = () => {
       setEditingData(null);
       setEditingDataId(null);
     } catch (err: any) {
-      setError(err?.data?.detail || t('secrets.updateError'));
+      const errorDetail = err?.data?.detail;
+      setError(errorDetail || t('secrets.updateError'));
+      
+      // If vault is sealed, close the modal so the error is visible on the dashboard
+      if (errorDetail === "Vault is sealed. Cannot update data value." ||
+          errorDetail === "No master key available. Vault may need to be unsealed." ||
+          err?.status === 503) {
+          setIsEditModalOpen(false);
+          setEditingData(null);
+          setEditingDataId(null);
+      }
+    }
+  };
+
+  const handleManualRotate = async () => {
+    if (!editingDataId) return;
+    try {
+        await rotateData(editingDataId).unwrap();
+        setSuccess(t('secrets.rotationSuccess', 'Secret rotated successfully!'));
+        refetch(); // Refresh data to show new version
+        setIsEditModalOpen(false);
+        setIsRotateConfirmOpen(false);
+    } catch (err: any) {
+        const errorDetail = err?.data?.detail;
+        setError(errorDetail || t('secrets.rotationError', 'Failed to rotate secret'));
+        
+        // If vault is sealed, close the modal
+        if (errorDetail === "Vault is sealed. Please unseal the vault first." ||
+            errorDetail === "No master key available. Vault may need to be unsealed." ||
+            err?.status === 503) {
+            setIsEditModalOpen(false);
+            setEditingData(null);
+            setEditingDataId(null);
+        }
+        setIsRotateConfirmOpen(false);
     }
   };
 
@@ -330,7 +394,6 @@ const DataPage: React.FC = () => {
 
     return (
         <div className="space-y-6">
-             {/* Project Assignment */}
              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                  {t('secrets.projectAssignment')}
@@ -353,6 +416,55 @@ const DataPage: React.FC = () => {
                    ? t('secrets.ownerChange')
                    : t('secrets.notOwnerChange')}
                </p>
+             </div>
+
+             {/* Rotation Policy */}
+             <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
+                <div className="flex justify-between items-center mb-4">
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                        <RefreshCw className="w-4 h-4" />
+                        {t('secrets.rotationPolicy', 'Rotation Policy')}
+                    </h4>
+                    {(editingData.data_type === "credentials" || editingData.data_type === "api_key") && (
+                        <button
+                            type="button"
+                            onClick={() => setIsRotateConfirmOpen(true)}
+                            className="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors flex items-center gap-1"
+                        >
+                            <RefreshCw className="w-3 h-3" />
+                            {t('secrets.rotateNow', 'Rotate Now')}
+                        </button>
+                    )}
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            {t('secrets.rotationInterval', 'Rotation Interval (Days)')}
+                         </label>
+                         <input
+                            type="number"
+                            min="0"
+                            placeholder="0 (Disabled)"
+                            value={editRotationInterval}
+                            onChange={(e) => setEditRotationInterval(parseInt(e.target.value) || 0)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                         />
+                         <p className="text-xs text-gray-500 mt-1">
+                            {t('secrets.rotationHelp', 'Set to 0 to disable automatic rotation reminders.')}
+                         </p>
+                    </div>
+                    {fullData.next_rotation_date && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                {t('secrets.nextRotation', 'Next Rotation Due')}
+                            </label>
+                            <div className="px-3 py-2 bg-white dark:bg-gray-600 rounded-md border border-gray-200 dark:border-gray-500 text-sm">
+                                {new Date(fullData.next_rotation_date).toLocaleDateString("pl-PL")}
+                            </div>
+                        </div>
+                    )}
+                </div>
              </div>
             {formContent}
         </div>
@@ -557,6 +669,33 @@ const DataPage: React.FC = () => {
               {t('common.delete')}
             </button>
           </div>
+        </div>
+      </Modal>
+      {/* Rotation Confirmation Modal */}
+      <Modal
+        isOpen={isRotateConfirmOpen}
+        onClose={() => setIsRotateConfirmOpen(false)}
+        title={t('secrets.rotateConfirmTitle')}
+        size="sm"
+      >
+        <div className="space-y-4">
+            <p className="text-gray-600 dark:text-gray-300">
+                {t('secrets.rotateConfirmMessage')}
+            </p>
+            <div className="flex justify-end gap-3">
+                <button
+                    onClick={() => setIsRotateConfirmOpen(false)}
+                    className="btn-secondary"
+                >
+                    {t('common.cancel')}
+                </button>
+                <button
+                    onClick={handleManualRotate}
+                    className="btn-primary"
+                >
+                    {t('secrets.confirmRotate')}
+                </button>
+            </div>
         </div>
       </Modal>
     </div>

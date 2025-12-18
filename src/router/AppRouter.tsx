@@ -1,4 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import IntegrationPage from "../components/integration/IntegrationPage";
+
 import AdminDataPage from "../components/admin/AdminDataPage";
 import UsersManagementPage from "../components/admin/UsersManagementPage";
 import AuditDashboard from "../components/audit/AuditDashboard";
@@ -56,6 +58,7 @@ export const AppRouter = () => {
           }
         />
         <Route path="audit" element={<AuditDashboard />} />
+        <Route path="integrations" element={<IntegrationPage />} />
       </Route>
 
       <Route path="/" element={<Navigate to="/dashboard" replace />} />

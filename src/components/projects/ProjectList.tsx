@@ -1,4 +1,4 @@
-import { ChevronRight, Folder, Pencil, Plus } from 'lucide-react';
+import { Check, ChevronRight, Copy, Folder, Pencil, Plus } from 'lucide-react';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useListProjectsQuery } from '../../services/projectsApi';
@@ -15,6 +15,14 @@ export const ProjectList: React.FC = () => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [editingProject, setEditingProject] = useState<Project | null>(null);
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+    const [copiedId, setCopiedId] = useState<string | null>(null);
+
+    const handleCopyId = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(id);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+    };
 
     if (isLoading) return <LoadingSpinner />;
     if (error) return <Alert type="error" message={t('projects.loadError')} />;
@@ -73,8 +81,24 @@ export const ProjectList: React.FC = () => {
                             <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" />
                         </div>
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 pr-8">{project.name}</h3>
+                        <div className="flex items-center gap-2 mb-2">
+                             <span className="text-xs font-mono text-gray-500 dark:text-gray-400 select-all" onClick={(e) => e.stopPropagation()}>
+                                 ID: {project.id}
+                             </span>
+                             <button
+                                onClick={(e) => handleCopyId(e, project.id)}
+                                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                                title={t('common.copy')}
+                            >
+                                {copiedId === project.id ? (
+                                    <Check className="w-3 h-3 text-green-600 dark:text-green-400" />
+                                ) : (
+                                    <Copy className="w-3 h-3" />
+                                )}
+                            </button>
+                        </div>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {t('projects.created')} {new Date(project.created_at).toLocaleDateString()}
+                            {t('projects.created')} {new Date(project.created_at).toLocaleDateString("pl-PL")}
                         </p>
                     </div>
                 ))}

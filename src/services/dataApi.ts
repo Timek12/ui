@@ -1,8 +1,8 @@
 import type {
-  DataCreateRequest,
-  DataListItem,
-  DataResponse,
-  DataUpdate,
+    DataCreateRequest,
+    DataListItem,
+    DataResponse,
+    DataUpdate,
 } from "../types/data.types";
 import { api } from "./api";
 
@@ -87,6 +87,18 @@ export const dataApi = api.injectEndpoints({
         { type: "Data", id: "LIST" },
       ],
     }),
+
+    // Rotate Data
+    rotateData: builder.mutation<{ status: string; message: string }, string>({
+      query: (id) => ({
+        url: `/api/data/${id}/rotate`,
+        method: "POST",
+      }),
+      invalidatesTags: (_result, _error, id) => [
+        { type: "Data", id },
+        { type: "Data", id: "LIST" },
+      ],
+    }),
   }),
 });
 
@@ -96,4 +108,5 @@ export const {
   useCreateDataMutation,
   useUpdateDataMutation,
   useDeleteDataMutation,
+  useRotateDataMutation,
 } = dataApi;

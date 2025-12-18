@@ -250,7 +250,17 @@
       "loading": "Loading secrets...",
       "loadingData": "Loading secret data...",
       "noData": "No data available",
-      "deletePermissionError": "Only the owner or project admin can delete this secret"
+      "deletePermissionError": "Only the owner or project admin can delete this secret",
+      "rotateConfirmTitle": "Confirm Rotation",
+      "rotateConfirmMessage": "Are you sure you want to rotate this secret? A new value will be generated and the old one will be archived.",
+      "confirmRotate": "Yes, Rotate",
+      "rotationPolicy": "Rotation Policy",
+      "rotateNow": "Rotate Now",
+      "rotationInterval": "Rotation Interval (Days)",
+      "rotationHelp": "Set to 0 to disable automatic rotation reminders.",
+      "nextRotation": "Next Rotation Due",
+      "rotationSuccess": "Secret rotated successfully!",
+      "rotationError": "Failed to rotate secret"
     },
     "types": {
       "text": "Text",

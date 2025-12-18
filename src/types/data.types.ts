@@ -12,6 +12,7 @@ export interface DataCreateRequest {
   name: string;
   description?: string;
   data_type: string;
+  rotation_interval_days?: number;
 
   // Text
   fields?: Array<{ key: string; value: string }>;
@@ -86,12 +87,15 @@ export interface DataResponse {
   metadata?: DataMetadata;
   project_id?: string;
   decrypt_error?: string;
+  rotation_interval_days?: number;
+  next_rotation_date?: string;
 }
 
 export interface DataUpdate {
   name?: string;
   description?: string;
   is_active?: boolean;
+  rotation_interval_days?: number;
 
   // Text
   fields?: Array<{ key: string; value: string }>;
@@ -131,4 +135,6 @@ export interface DataListItem {
   updated_at: string;
   is_active: boolean;
   metadata?: DataMetadata;
+  rotation_interval_days?: number;
+  next_rotation_date?: string;
 }
