@@ -1,5 +1,5 @@
 import { Terminal } from "lucide-react";
-import React, { useState } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 
 const IntegrationPage: React.FC = () => {
