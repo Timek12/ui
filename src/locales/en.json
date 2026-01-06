@@ -178,7 +178,8 @@
       "projects": "Projects",
       "audit": "Audit",
       "users": "Users",
-      "vault": "Vault"
+      "vault": "Vault",
+      "integrations": "Integrations"
     },
     "projects": {
       "title": "Projects",
@@ -300,6 +301,17 @@
       "namespace": "Namespace *",
       "host": "Host (Optional)",
       "publicKey": "Public Key (Optional)"
+    },
+    "integrations": {
+      "title": "Integrations & CLI",
+      "subtitle": "Connect Luna with your CI/CD pipelines using our CLI tool.",
+      "lunaCli": "Luna CLI",
+      "description": "The Luna CLI allows you to securely fetch secrets during your build process. It supports JSON and Env output formats.",
+      "installation": "Installation",
+      "downloadScript": "# 1. Download the script (luna_cli.py)",
+      "makeExecutable": "# 2. Make it executable: chmod +x luna_cli.py",
+      "usageExample": "Usage Example",
+      "fetchSecretExample": "# Fetch secret by name and output as env vars"
     }
   }
 }

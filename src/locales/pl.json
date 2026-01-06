@@ -178,7 +178,8 @@
       "projects": "Projekty",
       "audit": "Audyt",
       "users": "Użytkownicy",
-      "vault": "System"
+      "vault": "System",
+      "integrations": "Integracje"
     },
     "projects": {
       "title": "Projekty",
@@ -300,6 +301,17 @@
       "namespace": "Przestrzeń nazw *",
       "host": "Host (Opcjonalnie)",
       "publicKey": "Klucz publiczny (Opcjonalnie)"
+    },
+    "integrations": {
+      "title": "Integracje i CLI",
+      "subtitle": "Połącz Lunę ze swoimi potokami CI/CD używając naszego narzędzia CLI.",
+      "lunaCli": "Luna CLI",
+      "description": "Luna CLI pozwala na bezpieczne pobieranie sekretów podczas procesu budowania. Obsługuje formaty wyjściowe JSON i Env.",
+      "installation": "Instalacja",
+      "downloadScript": "# 1. Pobierz skrypt (luna_cli.py)",
+      "makeExecutable": "# 2. Nadaj uprawnienia wykonywania: chmod +x luna_cli.py",
+      "usageExample": "Przykład użycia",
+      "fetchSecretExample": "# Pobierz sekret po nazwie i zapisz jako zmienne środowiskowe"
     }
   }
 }
