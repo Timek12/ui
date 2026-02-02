@@ -1,5 +1,23 @@
 # Luna Frontend
 
+## Important Setup Requirement
+
+This repository is designed to be run via Docker Compose located in the `core` repository. It must be placed in a folder alongside the `core` repository.
+
+**Required Directory Structure:**
+
+```
+workspace/
+├── core/           # Backend repository (contains docker-compose.yml)
+└── ui/             # This repository (Frontend)
+```
+
+To start the full application (Frontend + Backend), navigate to the `core` directory and run:
+
+```bash
+docker-compose up -d --build
+```
+
 ## 🚀 Features
 
 - **Authentication & Authorization** - Login, register
