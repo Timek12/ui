@@ -9,9 +9,8 @@ import {
   Moon,
   Shield,
   Sun,
-  Terminal,
   User,
-  Users
+  Users,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -29,7 +28,7 @@ const DashboardLayout: React.FC = () => {
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
   const refreshToken = useSelector(
-    (state: RootState) => state.auth.refreshToken
+    (state: RootState) => state.auth.refreshToken,
   );
   const [logoutApi] = useLogoutMutation();
   const [darkMode, setDarkMode] = useState(() => {
@@ -40,13 +39,22 @@ const DashboardLayout: React.FC = () => {
   });
 
   const navItems = [
-    { to: "/dashboard", label: t('nav.dashboard'), icon: LayoutDashboard },
-    { to: "/dashboard/data", label: t('nav.secrets'), icon: Database },
-    { to: "/dashboard/projects", label: t('nav.projects'), icon: Folder },
-    { to: "/dashboard/audit", label: t('nav.audit'), icon: FileText },
-    { to: "/dashboard/integrations", label: t('nav.integrations'), icon: Terminal },
-    { to: "/dashboard/users", label: t('nav.users'), icon: Users, adminOnly: true },
-    { to: "/dashboard/vault", label: t('nav.vault'), icon: Shield, adminOnly: true },
+    { to: "/dashboard", label: t("nav.dashboard"), icon: LayoutDashboard },
+    { to: "/dashboard/data", label: t("nav.secrets"), icon: Database },
+    { to: "/dashboard/projects", label: t("nav.projects"), icon: Folder },
+    { to: "/dashboard/audit", label: t("nav.audit"), icon: FileText },
+    {
+      to: "/dashboard/users",
+      label: t("nav.users"),
+      icon: Users,
+      adminOnly: true,
+    },
+    {
+      to: "/dashboard/vault",
+      label: t("nav.vault"),
+      icon: Shield,
+      adminOnly: true,
+    },
   ];
 
   useEffect(() => {
@@ -80,7 +88,7 @@ const DashboardLayout: React.FC = () => {
   };
 
   const filteredNavItems = navItems.filter(
-    (item) => !item.adminOnly || user?.role === "admin"
+    (item) => !item.adminOnly || user?.role === "admin",
   );
 
   // Only show admin features
@@ -104,7 +112,7 @@ const DashboardLayout: React.FC = () => {
               <button
                 onClick={() => setDarkMode(!darkMode)}
                 className="p-2 text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-white/10 rounded-lg transition-colors"
-                aria-label={t('common.toggleDarkMode')}
+                aria-label={t("common.toggleDarkMode")}
               >
                 {darkMode ? (
                   <Sun className="w-5 h-5" />
@@ -123,7 +131,7 @@ const DashboardLayout: React.FC = () => {
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
               >
                 <LogOut className="w-4 h-4" />
-                {t('auth.logout')}
+                {t("auth.logout")}
               </button>
             </div>
           </div>
@@ -133,13 +141,19 @@ const DashboardLayout: React.FC = () => {
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-6">
           {/* Sidebar */}
-          <aside className={`flex-shrink-0 transition-all duration-300 ${sidebarCollapsed ? 'w-16' : 'w-64'}`}>
+          <aside
+            className={`flex-shrink-0 transition-all duration-300 ${sidebarCollapsed ? "w-16" : "w-64"}`}
+          >
             <div className="bg-white/80 dark:bg-gray-800/60 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/50 relative min-h-[calc(100vh-8rem)]">
               {/* Toggle Button */}
               <button
                 onClick={toggleSidebar}
                 className="absolute -right-3 top-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full p-1.5 shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors z-10 text-primary-600 dark:text-primary-400"
-                aria-label={sidebarCollapsed ? t('common.expandSidebar') : t('common.collapseSidebar')}
+                aria-label={
+                  sidebarCollapsed
+                    ? t("common.expandSidebar")
+                    : t("common.collapseSidebar")
+                }
               >
                 {sidebarCollapsed ? (
                   <ChevronRight className="w-3 h-3" />
@@ -160,11 +174,15 @@ const DashboardLayout: React.FC = () => {
                         isActive
                           ? "bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-lg shadow-primary-500/25"
                           : "text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-white/5 hover:text-primary-600 dark:hover:text-primary-400"
-                      } ${sidebarCollapsed ? 'justify-center py-3' : 'gap-3 px-4 py-3'}`
+                      } ${sidebarCollapsed ? "justify-center py-3" : "gap-3 px-4 py-3"}`
                     }
                   >
-                    <item.icon className={`w-5 h-5 flex-shrink-0 ${sidebarCollapsed ? '' : ''}`} />
-                    {!sidebarCollapsed && <span className="font-medium">{item.label}</span>}
+                    <item.icon
+                      className={`w-5 h-5 flex-shrink-0 ${sidebarCollapsed ? "" : ""}`}
+                    />
+                    {!sidebarCollapsed && (
+                      <span className="font-medium">{item.label}</span>
+                    )}
                   </NavLink>
                 ))}
               </nav>
