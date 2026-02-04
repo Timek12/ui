@@ -2,9 +2,10 @@ import { Key, Shield, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    useDeleteAnyDataMutation,
-    useGetAllDataQuery,
+  useDeleteAnyDataMutation,
+  useGetAllDataQuery,
 } from "../../services/adminApi";
+import { formatDate } from "../../utils/dateFormat";
 import Alert from "../common/Alert";
 import LoadingSpinner from "../common/LoadingSpinner";
 import Modal from "../common/Modal";
@@ -26,14 +27,14 @@ const AdminDataPage: React.FC = () => {
 
     try {
       await deleteData(selectedData).unwrap();
-      setMessage({ type: "success", text: t('admin.deleteSecretSuccess') });
+      setMessage({ type: "success", text: t("admin.deleteSecretSuccess") });
       setShowDeleteModal(false);
       setSelectedData(null);
       setTimeout(() => setMessage(null), 3000);
     } catch (err: any) {
       setMessage({
         type: "error",
-        text: err.data?.detail || t('admin.deleteSecretError'),
+        text: err.data?.detail || t("admin.deleteSecretError"),
       });
       setShowDeleteModal(false);
       setTimeout(() => setMessage(null), 5000);
@@ -43,15 +44,13 @@ const AdminDataPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-96">
-        <LoadingSpinner size="lg" message={t('admin.loadingSecrets')} />
+        <LoadingSpinner size="lg" message={t("admin.loadingSecrets")} />
       </div>
     );
   }
 
   if (error) {
-    return (
-      <Alert type="error" message={t('admin.loadSecretsError')} />
-    );
+    return <Alert type="error" message={t("admin.loadSecretsError")} />;
   }
 
   return (
@@ -59,15 +58,15 @@ const AdminDataPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            {t('admin.secretManagement')}
+            {t("admin.secretManagement")}
           </h1>
           <p className="text-gray-600 dark:text-gray-300 mt-2">
-            {t('admin.viewAllSecrets')}
+            {t("admin.viewAllSecrets")}
           </p>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
           <Shield className="w-4 h-4" />
-          <span>{t('admin.adminOnly')}</span>
+          <span>{t("admin.adminOnly")}</span>
         </div>
       </div>
 
@@ -82,7 +81,7 @@ const AdminDataPage: React.FC = () => {
       <div className="card">
         <div className="mb-4">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            {t('admin.allSecrets')} ({dataItems?.length || 0})
+            {t("admin.allSecrets")} ({dataItems?.length || 0})
           </h2>
         </div>
 
@@ -91,25 +90,25 @@ const AdminDataPage: React.FC = () => {
             <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  {t('forms.secretName')}
+                  {t("forms.secretName")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  {t('forms.description')}
+                  {t("forms.description")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  {t('projects.userId')}
+                  {t("projects.userId")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  {t('secrets.version')}
+                  {t("secrets.version")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  {t('secrets.created')}
+                  {t("secrets.created")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Updated
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  {t('common.actions')}
+                  {t("common.actions")}
                 </th>
               </tr>
             </thead>
@@ -126,7 +125,7 @@ const AdminDataPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-gray-900 dark:text-white max-w-xs truncate">
-                      {item.description || t('secrets.noDescription')}
+                      {item.description || t("secrets.noDescription")}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -140,10 +139,10 @@ const AdminDataPage: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(item.created_at).toLocaleDateString("pl-PL")}
+                    {formatDate(item.created_at)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(item.updated_at).toLocaleDateString("pl-PL")}
+                    {formatDate(item.updated_at)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
@@ -152,7 +151,7 @@ const AdminDataPage: React.FC = () => {
                         setShowDeleteModal(true);
                       }}
                       className="text-red-600 hover:text-red-900"
-                      title={t('common.delete')}
+                      title={t("common.delete")}
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -166,7 +165,9 @@ const AdminDataPage: React.FC = () => {
         {dataItems && dataItems.length === 0 && (
           <div className="text-center py-12">
             <Key className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500 dark:text-gray-400">{t('admin.noSecrets')}</p>
+            <p className="text-gray-500 dark:text-gray-400">
+              {t("admin.noSecrets")}
+            </p>
           </div>
         )}
       </div>
@@ -178,11 +179,11 @@ const AdminDataPage: React.FC = () => {
           setShowDeleteModal(false);
           setSelectedData(null);
         }}
-        title={t('admin.deleteSecretTitle')}
+        title={t("admin.deleteSecretTitle")}
       >
         <div className="space-y-4">
           <p className="text-gray-600 dark:text-gray-300">
-            {t('admin.deleteSecretConfirm')}
+            {t("admin.deleteSecretConfirm")}
           </p>
           <div className="flex justify-end gap-3">
             <button
@@ -192,10 +193,10 @@ const AdminDataPage: React.FC = () => {
               }}
               className="btn-secondary"
             >
-              {t('common.cancel')}
+              {t("common.cancel")}
             </button>
             <button onClick={handleDeleteData} className="btn-danger">
-              {t('admin.deleteSecretButton')}
+              {t("admin.deleteSecretButton")}
             </button>
           </div>
         </div>
